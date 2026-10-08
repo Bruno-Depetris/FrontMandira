@@ -11,7 +11,7 @@ export const CONFIG = {
      * Sin esto el login no funciona. Ver README.md para los pasos.
      * Tiene que ser EL MISMO valor que Google__ClientId en la API.
      */
-    googleClientId: "",
+    googleClientId: "630426751791-d9huo7ht864krhgu3ne6sjoec8g12fkt.apps.googleusercontent.com",
 
     /** Numero al que se manda el pedido, con codigo de pais y sin signos. */
     whatsapp: "543564567771",
