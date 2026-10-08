@@ -1,29 +1,15 @@
 import { api } from "./api.js";
 import { haySesion, usuarioActual } from "./sesion.js";
-import { dibujarBoton, hayClientIdConfigurado, salir } from "./auth.js";
+import { salir } from "./auth.js";
+import { panelAcceso } from "./acceso.js";
 import { esc, moneda, cargando, panelError, vacio, aviso } from "./ui.js";
 
 export async function vistaCuenta(contenedor) {
     if(!haySesion()) {
-        contenedor.innerHTML =
-            '<section class="seccion muro-login">' +
-            '<img class="muro-marca" src="Assets/isologo.png" alt="">' +
-            "<h2>Entrá a tu cuenta</h2>" +
-            "<p>Mirá tus pedidos y guardá tus datos para comprar más rápido.</p>" +
-            '<div id="botonGoogleCuenta" class="zona-boton-google"></div>' +
-            '<p id="avisoCuenta" class="ayuda"></p>' +
-            "</section>";
-
-        const avisoCuenta = contenedor.querySelector("#avisoCuenta");
-
-        if(!hayClientIdConfigurado()) {
-            avisoCuenta.innerHTML =
-                "Falta configurar <code>googleClientId</code> en <code>config.js</code> para habilitar el ingreso.";
-            return;
-        }
-
-        dibujarBoton(contenedor.querySelector("#botonGoogleCuenta")).catch(error => {
-            avisoCuenta.textContent = error.message;
+        panelAcceso(contenedor, {
+            titulo: "Entrá a tu cuenta",
+            texto: "Mirá tus pedidos y guardá tus datos para comprar más rápido.",
+            alIngresar: () => vistaCuenta(contenedor)
         });
         return;
     }
@@ -38,7 +24,8 @@ export async function vistaCuenta(contenedor) {
         '<button class="boton-sutil" id="botonSalir">Cerrar sesión</button>' +
         "</header>" +
         '<div class="disposicion-cuenta">' +
-        '<div id="zonaPerfil">' + cargando("Cargando tus datos") + "</div>" +
+        '<div><div id="zonaPerfil">' + cargando("Cargando tus datos") + "</div>" +
+        '<div id="zonaContrasena"></div></div>' +
         '<div id="zonaPedidos">' + cargando("Buscando tus pedidos") + "</div>" +
         "</div></section>";
 
@@ -47,6 +34,8 @@ export async function vistaCuenta(contenedor) {
         aviso("Cerraste sesión.", "info");
         window.location.hash = "#/";
     });
+
+    dibujarContrasena(contenedor.querySelector("#zonaContrasena"));
 
     await Promise.all([
         dibujarPerfil(contenedor.querySelector("#zonaPerfil")),
@@ -113,6 +102,62 @@ async function dibujarPerfil(zona) {
         } finally {
             boton.disabled = false;
             boton.textContent = "Guardar cambios";
+        }
+    });
+}
+
+/**
+ * Deja poner o cambiar la contrasena. Quien entro con Google la usa para habilitar
+ * tambien el ingreso con correo y contrasena: en ese caso no hay contrasena actual
+ * que pedirle, asi que el campo es opcional y la API no lo exige.
+ */
+function dibujarContrasena(zona) {
+    zona.innerHTML =
+        '<form class="tarjeta-panel" id="formContrasena" novalidate><h3>Contraseña</h3>' +
+        '<p class="ayuda">Si entrás con Google podés ponerle una contraseña para ingresar también ' +
+        "sin Google. Dejá vacía la actual si todavía no tenés una.</p>" +
+        '<div class="campo"><label for="contrasenaActual">Contraseña actual</label>' +
+        '<input type="password" id="contrasenaActual" autocomplete="current-password"></div>' +
+        '<div class="campo"><label for="contrasenaNueva">Contraseña nueva <span class="req">*</span></label>' +
+        '<input type="password" id="contrasenaNueva" autocomplete="new-password">' +
+        '<p class="ayuda">Mínimo 8 caracteres.</p></div>' +
+        '<p id="errorContrasena" class="error-form" hidden></p>' +
+        '<button type="submit" class="boton-sutil" id="botonGuardarContrasena">Guardar contraseña</button>' +
+        "</form>";
+
+    const formulario = zona.querySelector("#formContrasena");
+    const zonaError = zona.querySelector("#errorContrasena");
+
+    formulario.addEventListener("submit", async evento => {
+        evento.preventDefault();
+
+        const boton = zona.querySelector("#botonGuardarContrasena");
+        const nueva = zona.querySelector("#contrasenaNueva").value;
+
+        if(nueva.length < 8) {
+            zonaError.textContent = "La contraseña nueva tiene que tener al menos 8 caracteres.";
+            zonaError.hidden = false;
+            return;
+        }
+
+        zonaError.hidden = true;
+        boton.disabled = true;
+        boton.textContent = "Guardando…";
+
+        try {
+            await api.cambiarContrasena({
+                contrasenaActual: zona.querySelector("#contrasenaActual").value,
+                contrasenaNueva: nueva
+            });
+
+            formulario.reset();
+            aviso("Listo, ya podés entrar con tu correo y esta contraseña.", "exito");
+        } catch(error) {
+            zonaError.textContent = error.message;
+            zonaError.hidden = false;
+        } finally {
+            boton.disabled = false;
+            boton.textContent = "Guardar contraseña";
         }
     });
 }

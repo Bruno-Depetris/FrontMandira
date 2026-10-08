@@ -20,7 +20,7 @@ Todo se define en `config.js`:
 | Clave | Qué es |
 | --- | --- |
 | `apiUrl` | URL de MandiraApiREST. Se puede pisar en dev con `localStorage.setItem("mandira.tienda.apiUrl", "http://localhost:5133")`. |
-| `googleClientId` | **Hay que completarlo.** Client ID de Google. Sin esto no hay login y no se puede comprar. |
+| `googleClientId` | Client ID de Google. Si queda vacío se oculta el botón de Google y queda solo el ingreso con correo y contraseña. |
 | `whatsapp` | Número que recibe los pedidos. Hoy: `543564567771`. |
 
 ### Cómo sacar el Client ID de Google
@@ -49,24 +49,58 @@ En Railway (o donde esté la API):
 ```
 Google__ClientId=XXXXXXXX.apps.googleusercontent.com
 Google__AdminEmails=tucorreo@gmail.com,otroadmin@gmail.com
+Jwt__Clave=<una frase larga y secreta>
 ```
 
 `Google__AdminEmails` define quién puede administrar el catálogo. Un usuario logueado que
 no esté en esa lista puede comprar, pero no tocar productos, stock ni precios.
+El panel **solo** acepta tokens de Google: una cuenta de correo y contraseña nunca llega a
+administrador, aunque se registre con el correo del admin.
+
+`Jwt__Clave` es el secreto con el que la API firma los tokens de quienes entran con correo y
+contraseña. Puede ser cualquier texto largo. Si queda sin configurar la API arranca igual,
+pero usa una clave distinta en cada reinicio y las sesiones se cortan en cada deploy.
+
+### La columna de la contraseña
+
+Las contraseñas se guardan hasheadas (PBKDF2-SHA256) en `usuariosweb.contrasena`, y el valor
+ocupa 44 caracteres. Si la columna es más corta que eso, el registro falla con un error 500
+al escribir. Para asegurarse:
+
+```sql
+ALTER TABLE usuariosweb ALTER COLUMN contrasena TYPE varchar(100);
+```
+
+## Ingreso de clientes
+
+Hay dos caminos y los dos terminan en la misma fila de `usuariosweb` y en un token Bearer
+que la API acepta igual:
+
+- **Google**: el navegador obtiene un `id_token` con Google Identity Services. La primera vez,
+  `GET /api/Perfil` crea el `UsuarioWeb` con el correo verificado del token.
+- **Correo y contraseña**: `POST /api/Auth/registro` y `POST /api/Auth/login` devuelven un
+  token firmado por la API (30 días). El registro pide los campos de la tabla: nombre, correo,
+  contraseña, teléfono y dirección (los dos últimos son opcionales).
+
+Quien entró con Google puede ponerle una contraseña a su cuenta desde **Mi cuenta → Contraseña**
+(`PUT /api/Perfil/contrasena`) y después entrar por cualquiera de las dos vías. Al revés no:
+registrarse con un correo que ya existe se rechaza, porque el correo del registro no está
+verificado y permitirlo sería regalarle la cuenta a cualquiera que lo adivine.
 
 ## Cómo está armada
 
 | Archivo | Qué hace |
 | --- | --- |
 | `config.js` | Única fuente de configuración. |
-| `js/sesion.js` | Guarda el `id_token` de Google, lo decodifica y lo vence solo. |
+| `js/sesion.js` | Guarda el token de la sesión (de Google o de la API), lo decodifica y lo vence solo. |
 | `js/auth.js` | Carga el SDK de Google y dibuja el botón oficial de ingreso. |
+| `js/acceso.js` | Panel de ingreso compartido: botón de Google + formularios de login y registro. |
 | `js/api.js` | Cliente HTTP; agrega el `Bearer` y traduce los errores de la API. |
 | `js/datos.js` | Cache del catálogo: cruza productos, categorías, fotos y stock. |
 | `js/carrito.js` | Carrito en `localStorage` con sus totales. |
 | `js/vistas-tienda.js` | Inicio, catálogo con filtros y detalle de producto. |
 | `js/vistas-carrito.js` | Carrito, checkout y armado del mensaje de WhatsApp. |
-| `js/vistas-cuenta.js` | Perfil editable y historial de pedidos. |
+| `js/vistas-cuenta.js` | Perfil editable, contraseña e historial de pedidos. |
 | `js/app.js` | Router por hash y cabecera. |
 
 ## El checkout
@@ -104,5 +138,11 @@ llega por `GET /api/Productos/disponibilidad`, que solo informa cantidades.
 - Los productos se muestran si tienen `publicado = true`. Sin registros de stock se
   asume disponible, para no esconder un producto recién cargado.
 - Un producto sin fotos muestra el isologo como marcador.
-- La sesión vive en `sessionStorage`: al cerrar la pestaña hay que volver a entrar.
-  El token de Google dura alrededor de una hora.
+- La sesión vive en `sessionStorage` (dura lo que dura la pestaña) salvo que se marque
+  *Mantenerme conectado*, y ahí pasa a `localStorage`. El token de Google dura alrededor de
+  una hora; el de correo y contraseña, 30 días.
+- El correo del registro no se verifica: no hay envío de mails configurado. Por eso no se
+  puede tomar una cuenta que ya existe, y tampoco hay "olvidé mi contraseña" (hoy la
+  recupera el admin desde el panel).
+- El freno de `/api/Auth` es por IP y en memoria: con varias instancias de la API cada una
+  lleva su propia cuenta.

@@ -90,6 +90,16 @@ function mensajeDeError(datos, estado) {
         return "No tenés permiso para hacer esta acción.";
     }
 
+    if(estado === 404) {
+        // Sin "detail" un 404 casi siempre significa que la API publicada es anterior
+        // a este endpoint, no que falte el dato.
+        return "Esta función todavía no está disponible en el servidor. Volvé a intentar en unos minutos.";
+    }
+
+    if(estado === 429) {
+        return "Probaste demasiadas veces seguidas. Esperá un minuto y volvé a intentar.";
+    }
+
     return "La tienda respondió con un error (" + estado + ").";
 }
 
@@ -103,6 +113,11 @@ export const api = {
     fotos: () => pedir("GET", "/api/Fotos"),
     formasDePago: () => pedir("GET", "/api/FormaPagos"),
     entregas: () => pedir("GET", "/api/Entregas"),
+
+    // --- cuenta propia (correo y contrasena) ---
+    registro: cuerpo => pedir("POST", "/api/Auth/registro", cuerpo),
+    login: cuerpo => pedir("POST", "/api/Auth/login", cuerpo),
+    cambiarContrasena: cuerpo => pedir("PUT", "/api/Perfil/contrasena", cuerpo),
 
     // --- sesion ---
     perfil: () => pedir("GET", "/api/Perfil"),

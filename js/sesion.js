@@ -1,7 +1,13 @@
 /**
- * Guarda el id_token de Google y lo deja disponible para el cliente HTTP.
+ * Guarda el token de la sesion y lo deja disponible para el cliente HTTP.
+ * Sirve igual para el id_token de Google y para el que emite la API cuando
+ * el cliente entra con correo y contrasena.
+ *
  * Vive aparte de auth.js para que api.js pueda leer el token sin depender
  * del SDK de Google (y sin importaciones circulares).
+ *
+ * Se guarda en sessionStorage (dura lo que dura la pestaña) salvo que el
+ * usuario pida que lo recordemos, y ahi pasa a localStorage.
  */
 const CLAVE_TOKEN = "mandira.tienda.token";
 const oyentes = new Set();
@@ -9,10 +15,46 @@ const oyentes = new Set();
 let token = leerGuardado();
 
 function leerGuardado() {
+    for(const deposito of depositos()) {
+        try {
+            const guardado = deposito.getItem(CLAVE_TOKEN);
+
+            if(guardado) {
+                return guardado;
+            }
+        } catch {
+            // Deposito bloqueado: se prueba el siguiente.
+        }
+    }
+
+    return null;
+}
+
+function depositos() {
+    const lista = [];
+
     try {
-        return sessionStorage.getItem(CLAVE_TOKEN);
+        lista.push(sessionStorage);
     } catch {
-        return null;
+        // sin sessionStorage
+    }
+
+    try {
+        lista.push(localStorage);
+    } catch {
+        // sin localStorage
+    }
+
+    return lista;
+}
+
+function olvidarEnTodos() {
+    for(const deposito of depositos()) {
+        try {
+            deposito.removeItem(CLAVE_TOKEN);
+        } catch {
+            // nada que limpiar
+        }
     }
 }
 
@@ -84,13 +126,15 @@ export function haySesion() {
     return obtenerToken() !== null;
 }
 
-export function guardarToken(nuevo) {
+export function guardarToken(nuevo, recordar = false) {
     token = nuevo;
+    olvidarEnTodos();
 
     try {
-        sessionStorage.setItem(CLAVE_TOKEN, nuevo);
+        const deposito = recordar ? localStorage : sessionStorage;
+        deposito.setItem(CLAVE_TOKEN, nuevo);
     } catch {
-        // Sin almacenamiento la sesion dura lo que dure la pestaña.
+        // Sin almacenamiento la sesion dura lo que dure la pagina.
     }
 
     avisar();
@@ -98,13 +142,7 @@ export function guardarToken(nuevo) {
 
 export function cerrarSesion() {
     token = null;
-
-    try {
-        sessionStorage.removeItem(CLAVE_TOKEN);
-    } catch {
-        // nada que limpiar
-    }
-
+    olvidarEnTodos();
     avisar();
 }
 

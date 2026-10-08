@@ -2,7 +2,7 @@ import { CONFIG } from "../config.js";
 import { api } from "./api.js";
 import { obtenerItems, fijarCantidad, quitar, importeTotal, vaciar, cantidadTotal } from "./carrito.js";
 import { haySesion } from "./sesion.js";
-import { dibujarBoton, hayClientIdConfigurado } from "./auth.js";
+import { panelAcceso } from "./acceso.js";
 import { esc, moneda, cargando, panelError, vacio, aviso } from "./ui.js";
 
 // ------------------------------------------------------------------ carrito
@@ -88,7 +88,12 @@ export async function vistaCheckout(contenedor) {
     }
 
     if(!haySesion()) {
-        mostrarMuroDeLogin(contenedor);
+        panelAcceso(contenedor, {
+            titulo: "Iniciá sesión para terminar la compra",
+            texto: "Necesitamos identificarte para registrar el pedido y que puedas seguirlo después.",
+            pie: '<a class="boton-sutil volver-carrito" href="#/carrito">Volver al carrito</a>',
+            alIngresar: () => vistaCheckout(contenedor)
+        });
         return;
     }
 
@@ -109,7 +114,8 @@ export async function vistaCheckout(contenedor) {
         ]);
     } catch(error) {
         if(error.esDeSesion) {
-            mostrarMuroDeLogin(contenedor);
+            // El token se vencio mientras preparabamos el pedido: se vuelve a pedir el ingreso.
+            await vistaCheckout(contenedor);
             return;
         }
 
@@ -196,32 +202,6 @@ export async function vistaCheckout(contenedor) {
     });
 
     refrescarTotales();
-}
-
-function mostrarMuroDeLogin(contenedor) {
-    contenedor.innerHTML =
-        '<section class="seccion muro-login">' +
-        '<img class="muro-marca" src="Assets/isologo.png" alt="">' +
-        "<h2>Iniciá sesión para terminar la compra</h2>" +
-        "<p>Necesitamos identificarte para registrar el pedido y que puedas seguirlo después.</p>" +
-        '<div id="botonGoogleCheckout" class="zona-boton-google"></div>' +
-        '<p id="avisoLogin" class="ayuda"></p>' +
-        '<a class="boton-sutil" href="#/carrito">Volver al carrito</a>' +
-        "</section>";
-
-    const zonaBoton = contenedor.querySelector("#botonGoogleCheckout");
-    const avisoLogin = contenedor.querySelector("#avisoLogin");
-
-    if(!hayClientIdConfigurado()) {
-        avisoLogin.innerHTML =
-            "El inicio de sesión todavía no está configurado: falta el <code>googleClientId</code> en " +
-            "<code>config.js</code>. Mirá el README para crearlo.";
-        return;
-    }
-
-    dibujarBoton(zonaBoton, { texto: "continue_with" }).catch(error => {
-        avisoLogin.textContent = error.message;
-    });
 }
 
 /** Escribe el pedido en la API y abre WhatsApp con el detalle. */
