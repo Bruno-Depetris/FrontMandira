@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandira</title>
+    <meta name="description" content="Mochilas y carteras pensadas para todos los días.">
+    <link rel="icon" href="Assets/isologo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+<header class="cabecera">
+    <div class="cabecera-interior">
+        <button type="button" id="botonMenu" class="boton-menu" aria-label="Abrir menú">&#9776;</button>
+
+        <a class="marca" href="#/">
+            <img src="Assets/isologo.png" alt="Mandira">
+            <span>Mandira</span>
+        </a>
+
+        <nav id="navegacion" class="navegacion">
+            <a class="nav-enlace" href="#/">Inicio</a>
+            <a class="nav-enlace" href="#/catalogo">Catálogo</a>
+        </nav>
+
+        <form id="formBusqueda" class="busqueda" role="search">
+            <input type="search" id="busquedaCabecera" placeholder="Buscar…" aria-label="Buscar productos">
+        </form>
+
+        <div class="acciones">
+            <a class="accion" id="enlaceCuenta" href="#/cuenta"><span>Ingresar</span></a>
+            <a class="accion accion-carrito" href="#/carrito" aria-label="Ver carrito">
+                <span>Carrito</span>
+                <span class="burbuja" id="burbujaCarrito" hidden>0</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<main id="contenido" class="contenido"></main>
+
+<footer class="pie">
+    <div class="pie-interior">
+        <img class="pie-marca" src="Assets/Logotipo.png" alt="Mandira">
+        <p>Escribinos y te ayudamos a elegir.</p>
+        <a class="boton-sutil" id="enlaceWhatsappPie" target="_blank" rel="noopener">Consultar por WhatsApp</a>
+        <p class="pie-legal">&copy; <span id="anioActual"></span> Mandira. Todos los derechos reservados.</p>
+    </div>
+</footer>
+
+<div id="avisos" class="avisos"></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
