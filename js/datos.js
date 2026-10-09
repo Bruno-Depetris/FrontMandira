@@ -1,4 +1,4 @@
-import { api } from "./api.js";
+import { api, urlDeImagen } from "./api.js";
 
 /**
  * Cache del catalogo. La tienda pide todo junto una sola vez y despues
@@ -46,12 +46,15 @@ async function construir() {
 
     const fotosPorProducto = new Map();
 
-    for(const foto of fotos) {
+    // La galeria se respeta en el orden que fijo el panel; la primera es la principal.
+    const ordenadas = [...fotos].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0) || a.id - b.id);
+
+    for(const foto of ordenadas) {
         if(!fotosPorProducto.has(foto.productoId)) {
             fotosPorProducto.set(foto.productoId, []);
         }
 
-        fotosPorProducto.get(foto.productoId).push(foto.direccionUrl);
+        fotosPorProducto.get(foto.productoId).push(urlDeImagen(foto.direccionUrl));
     }
 
     const stockPorProducto = new Map();

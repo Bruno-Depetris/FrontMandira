@@ -1,6 +1,23 @@
 import { urlApi } from "../config.js";
 import { obtenerToken, cerrarSesion } from "./sesion.js";
 
+/**
+ * Las fotos subidas al panel guardan una ruta propia y relativa ("/api/Fotos/12/imagen")
+ * en lugar de una url absoluta: si se guardara absoluta, cambiar de dominio dejaria
+ * todas las fotos rotas. Hay que resolverla contra la API, no contra esta pagina.
+ */
+export function urlDeImagen(direccion) {
+    if(!direccion) {
+        return direccion;
+    }
+
+    if(direccion.startsWith("/")) {
+        return urlApi() + direccion;
+    }
+
+    return direccion;
+}
+
 export class ErrorApi extends Error {
     constructor(mensaje, estado) {
         super(mensaje);
