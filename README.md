@@ -105,6 +105,23 @@ Lo que decidí al aplicarlo, con el porqué:
 | `--warning-texto` y `--error-texto` | Los semánticos del documento no llegan a 4.5:1 como texto sobre blanco (warning queda en 2.15:1 y error en 3.76:1). Sirven para bordes e iconos; cuando el color es texto se usan estas variantes, de 7.09:1 y 6.47:1. |
 | `--brand-accent` y `--badge-orange` quedan declarados sin uso | El sistema es casi monocromo en la capa de acción y prohíbe el acento en los CTAs. Quedan documentados para quien quiera extenderlo. |
 
+### Modo día y noche
+
+El documento describe un sistema claro, así que la paleta oscura es una **derivación**, no
+algo que esté ahí. Lo que se mantiene es la lógica: la capa de acción sigue siendo monocroma
+y de máximo contraste — en claro el CTA es casi negro sobre blanco, en oscuro casi blanco
+sobre negro. Un CTA casi negro sobre fondo oscuro desaparecería. El pie sigue siendo la
+superficie más oscura, que es con lo que el sistema cierra la página.
+
+El tema vive en `js/tema.js` y se estampa como `data-tema` en `<html>`; el CSS lo resuelve
+todo desde ahí, con los tokens oscuros en un único bloque `:root[data-tema="oscuro"]`. Si el
+usuario nunca eligió se sigue la preferencia del sistema **y se queda escuchando**: cambiar
+el tema del teléfono cambia la página. En cuanto toca el botón, su elección manda y deja de
+escucharse. Un script en línea en el `<head>` estampa el tema antes de pintar, para que
+entrar de noche no muestre un parpadeo claro.
+
+Los nueve pares de color del modo oscuro miden 4.74:1 o más.
+
 El conmutador de *Ya tengo cuenta / Crear cuenta* y, en pantallas chicas, los filtros del
 catálogo usan el `nav-pill-group` del sistema: envoltorio gris de radio pastilla con la
 pastilla activa en blanco y sombra suave.

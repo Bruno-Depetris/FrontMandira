@@ -12,6 +12,21 @@
          autoriza para la display, que en el original es Cal Sans (propietaria). -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/estilos.css">
+    <script>
+        // Se estampa el tema antes de pintar para que entrar de noche no muestre
+        // un parpadeo claro. js/tema.js se encarga del resto.
+        (function() {
+            try {
+                var guardado = localStorage.getItem("mandira.tienda.tema");
+                var oscuro = guardado === "oscuro" ||
+                    (!guardado && window.matchMedia &&
+                     window.matchMedia("(prefers-color-scheme: dark)").matches);
+                document.documentElement.dataset.tema = oscuro ? "oscuro" : "claro";
+            } catch (error) {
+                document.documentElement.dataset.tema = "claro";
+            }
+        })();
+    </script>
 </head>
 <body>
 
@@ -34,6 +49,7 @@
         </form>
 
         <div class="acciones">
+            <button type="button" class="accion accion-tema" id="botonTema">Modo oscuro</button>
             <a class="accion" id="enlaceCuenta" href="#/cuenta"><span>Ingresar</span></a>
             <a class="accion accion-carrito" href="#/carrito" aria-label="Ver carrito">
                 <span>Carrito</span>

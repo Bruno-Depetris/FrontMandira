@@ -5,6 +5,7 @@ import { vistaCuenta } from "./vistas-cuenta.js";
 import { alCambiarCarrito, cantidadTotal } from "./carrito.js";
 import { alCambiarSesion, usuarioActual } from "./sesion.js";
 import { esc } from "./ui.js";
+import { iniciarTema, conectarBotonDeTema } from "./tema.js";
 
 const contenido = document.getElementById("contenido");
 
@@ -138,6 +139,8 @@ alCambiarCarrito(refrescarCarritoEnCabecera);
 alCambiarSesion(refrescarCuentaEnCabecera);
 window.addEventListener("hashchange", enrutar);
 
+iniciarTema();
+conectarBotonDeTema(document.getElementById("botonTema"));
 conectarMenuMovil();
 conectarBusquedaDeCabecera();
 refrescarCarritoEnCabecera();
