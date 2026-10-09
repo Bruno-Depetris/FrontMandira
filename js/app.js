@@ -122,9 +122,17 @@ function conectarBusquedaDeCabecera() {
 }
 
 document.getElementById("anioActual").textContent = new Date().getFullYear();
-document.getElementById("enlaceWhatsappPie").href =
-    "https://wa.me/" + CONFIG.whatsapp + "?text=" +
+
+const enlaceWhatsapp = "https://wa.me/" + CONFIG.whatsapp + "?text=" +
     encodeURIComponent("Hola, quiero hacer una consulta.");
+
+for(const id of ["enlaceWhatsappPie", "enlaceWhatsappCta"]) {
+    const enlace = document.getElementById(id);
+
+    if(enlace) {
+        enlace.href = enlaceWhatsapp;
+    }
+}
 
 alCambiarCarrito(refrescarCarritoEnCabecera);
 alCambiarSesion(refrescarCuentaEnCabecera);

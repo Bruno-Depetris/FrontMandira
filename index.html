@@ -8,7 +8,9 @@
     <link rel="icon" href="Assets/isologo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+    <!-- Inter para interfaz y cuerpo; Manrope 700 es el sustituto que el sistema
+         autoriza para la display, que en el original es Cal Sans (propietaria). -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
@@ -18,7 +20,7 @@
         <button type="button" id="botonMenu" class="boton-menu" aria-label="Abrir menú">&#9776;</button>
 
         <a class="marca" href="#/">
-            <img src="Assets/isologo.png" alt="Mandira">
+            <img src="Assets/isologo.png" alt="">
             <span>Mandira</span>
         </a>
 
@@ -28,7 +30,7 @@
         </nav>
 
         <form id="formBusqueda" class="busqueda" role="search">
-            <input type="search" id="busquedaCabecera" placeholder="Buscar…" aria-label="Buscar productos">
+            <input type="search" id="busquedaCabecera" placeholder="Buscar un producto…" aria-label="Buscar productos">
         </form>
 
         <div class="acciones">
@@ -43,13 +45,44 @@
 
 <main id="contenido" class="contenido"></main>
 
+<!-- Banda de cierre antes del pie, como el cta-band-light del sistema. -->
+<section class="cta-banda">
+    <div class="cta-banda-interior">
+        <h2>¿No sabés cuál elegir?</h2>
+        <p>Escribinos por WhatsApp y te ayudamos a decidir.</p>
+        <a class="boton-primario" id="enlaceWhatsappCta" target="_blank" rel="noopener">Consultar por WhatsApp</a>
+    </div>
+</section>
+
+<!-- El unico fondo oscuro de la pagina. El logotipo de marca entra nativo aca. -->
 <footer class="pie">
     <div class="pie-interior">
-        <img class="pie-marca" src="Assets/Logotipo.png" alt="Mandira">
-        <p>Escribinos y te ayudamos a elegir.</p>
-        <a class="boton-sutil" id="enlaceWhatsappPie" target="_blank" rel="noopener">Consultar por WhatsApp</a>
-        <p class="pie-legal">&copy; <span id="anioActual"></span> Mandira. Todos los derechos reservados.</p>
+        <div>
+            <img class="pie-marca" src="Assets/isologo.png" alt="Mandira">
+            <p>Mochilas, carteras y accesorios pensados para todos los días.</p>
+            <a class="boton-sutil" id="enlaceWhatsappPie" target="_blank" rel="noopener">Escribinos</a>
+        </div>
+
+        <div class="pie-columna">
+            <h4>Tienda</h4>
+            <ul>
+                <li><a href="#/">Inicio</a></li>
+                <li><a href="#/catalogo">Catálogo</a></li>
+                <li><a href="#/carrito">Carrito</a></li>
+            </ul>
+        </div>
+
+        <div class="pie-columna">
+            <h4>Tu cuenta</h4>
+            <ul>
+                <li><a href="#/cuenta">Ingresar</a></li>
+                <li><a href="#/cuenta">Mis pedidos</a></li>
+                <li><a href="#/cuenta">Mis datos</a></li>
+            </ul>
+        </div>
     </div>
+
+    <p class="pie-legal">&copy; <span id="anioActual"></span> Mandira. Todos los derechos reservados.</p>
 </footer>
 
 <div id="avisos" class="avisos"></div>

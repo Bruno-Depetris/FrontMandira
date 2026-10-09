@@ -55,21 +55,32 @@ function conectarBotonesAgregar(raiz, porId) {
 // ------------------------------------------------------------------ inicio
 
 export async function vistaInicio(contenedor) {
+    // Hero 7/5: el titulo a la izquierda y a la derecha una tarjeta con un producto
+    // real adentro. El sistema pide mostrar el producto, no una ilustracion de el.
     contenedor.innerHTML =
         '<section class="hero">' +
-        '<img class="hero-marca" src="Assets/imagotipo.png" alt="' + esc(CONFIG.marca.nombre) + '">' +
+        '<div class="hero-texto">' +
         "<h1>" + esc(CONFIG.marca.lema) + "</h1>" +
         "<p>" + esc(CONFIG.marca.descripcion) + "</p>" +
+        '<div class="hero-acciones">' +
         '<a class="boton-primario" href="#/catalogo">Ver catálogo</a>' +
-        "</section>" +
+        '<a class="boton-sutil" href="#/cuenta">Crear mi cuenta</a>' +
+        "</div></div>" +
+        '<div class="hero-artefacto" id="heroArtefacto">' +
+        '<div class="hero-artefacto-cabecera">' +
+        '<img src="' + SIN_FOTO + '" alt=""><span>Recién llegado</span></div>' +
+        '<div class="hero-esqueleto"></div>' +
+        "</div></section>" +
         '<section class="seccion"><h2>Destacados</h2><div id="destacados">' + cargando() + "</div></section>";
 
     const zona = contenedor.querySelector("#destacados");
+    const artefacto = contenedor.querySelector("#heroArtefacto");
 
     try {
         const catalogo = await cargarCatalogo();
 
         if(catalogo.productos.length === 0) {
+            artefacto.remove();
             zona.innerHTML = vacio(
                 "Todavía no hay productos publicados",
                 "Volvé en un rato: estamos cargando la colección."
@@ -77,12 +88,34 @@ export async function vistaInicio(contenedor) {
             return;
         }
 
+        llenarArtefacto(artefacto, catalogo);
+        conectarBotonesAgregar(artefacto, catalogo.porId);
+
         const destacados = catalogo.productos.slice(0, 8);
         zona.innerHTML = '<div class="grilla">' + destacados.map(tarjeta).join("") + "</div>";
         conectarBotonesAgregar(zona, catalogo.porId);
     } catch(error) {
+        artefacto.remove();
         zona.innerHTML = panelError("No pudimos cargar los productos", error.message);
     }
+}
+
+/**
+ * Pone dentro de la tarjeta del hero el primer producto que tenga foto, y si
+ * ninguno la tiene, el primero igual. Debajo, las categorias como insignias.
+ */
+function llenarArtefacto(artefacto, catalogo) {
+    const conFoto = catalogo.productos.find(producto => producto.fotos.length > 0);
+    const elegido = conFoto || catalogo.productos[0];
+    const usadas = new Set(catalogo.productos.map(p => p.categoria && p.categoria.nombre).filter(Boolean));
+
+    artefacto.querySelector(".hero-esqueleto").outerHTML =
+        tarjeta(elegido) +
+        (usadas.size > 0
+            ? '<div class="hero-rubros">' +
+              [...usadas].slice(0, 4).map(nombre => '<span class="insignia">' + esc(nombre) + "</span>").join("") +
+              "</div>"
+            : "");
 }
 
 // ------------------------------------------------------------------ catalogo

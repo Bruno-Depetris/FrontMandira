@@ -87,6 +87,28 @@ Quien entró con Google puede ponerle una contraseña a su cuenta desde **Mi cue
 registrarse con un correo que ya existe se rechaza, porque el correo del registro no está
 verificado y permitirlo sería regalarle la cuenta a cualquiera que lo adivine.
 
+## Diseño
+
+La tienda implementa el sistema de `DESIGN-cal.md` (el análisis de Cal.com). Todo vive en
+`css/estilos.css`, con los tokens del documento como variables CSS en `:root`: canvas blanco,
+CTA casi negro (`--primary` #111111), display con tracking negativo, tarjetas de radio 12px,
+ritmo vertical de 96px entre bandas y **un solo fondo oscuro**, el pie, que cierra la página.
+
+Lo que decidí al aplicarlo, con el porqué:
+
+| Decisión | Motivo |
+| --- | --- |
+| **Manrope 700** para los títulos | Cal Sans es propietaria de Cal.com; el documento autoriza Manrope 700 como sustituto. Inter para interfaz y cuerpo. |
+| El **isologo va en un chip oscuro** | Los tres archivos de `Assets/` son arte rosa pálido sobre carbón **sólido, sin transparencia**: sobre canvas blanco serían recuadros oscuros. En vez de alterar la marca, el isologo se usa dentro de su propio cuadrado oscuro (cabecera, muro de login) y el pie, que ya es oscuro por sistema, lo muestra nativo. |
+| Tarjetas de producto **blancas con filete**, no grises | El documento reserva la tarjeta gris para afirmaciones abstractas y la blanca para mostrar el producto real. Un producto con foto es lo segundo. |
+| El hero muestra **un producto de verdad** | El sistema pide mostrar el producto en lugar de ilustrarlo. El artefacto del hero trae la primera ficha con foto; si no hay ninguna, la primera igual. |
+| `--warning-texto` y `--error-texto` | Los semánticos del documento no llegan a 4.5:1 como texto sobre blanco (warning queda en 2.15:1 y error en 3.76:1). Sirven para bordes e iconos; cuando el color es texto se usan estas variantes, de 7.09:1 y 6.47:1. |
+| `--brand-accent` y `--badge-orange` quedan declarados sin uso | El sistema es casi monocromo en la capa de acción y prohíbe el acento en los CTAs. Quedan documentados para quien quiera extenderlo. |
+
+El conmutador de *Ya tengo cuenta / Crear cuenta* y, en pantallas chicas, los filtros del
+catálogo usan el `nav-pill-group` del sistema: envoltorio gris de radio pastilla con la
+pastilla activa en blanco y sombra suave.
+
 ## Cómo está armada
 
 | Archivo | Qué hace |
