@@ -127,16 +127,16 @@
 
 /* En noche el fondo puede subir de intensidad: sobre casi negro no compite con
    ningun texto y es donde el efecto realmente se luce. */
-:root[data-tema="oscuro"] .burbuja-1 {
+:root[data-tema="oscuro"] .mancha-1 {
     background: radial-gradient(circle at 50% 50%, rgba(120, 72, 96, .48), rgba(120, 72, 96, 0) 70%);
 }
-:root[data-tema="oscuro"] .burbuja-2 {
+:root[data-tema="oscuro"] .mancha-2 {
     background: radial-gradient(circle at 50% 50%, rgba(44, 76, 120, .57), rgba(44, 76, 120, 0) 70%);
 }
-:root[data-tema="oscuro"] .burbuja-3 {
+:root[data-tema="oscuro"] .mancha-3 {
     background: radial-gradient(circle at 50% 50%, rgba(128, 84, 44, .44), rgba(128, 84, 44, 0) 70%);
 }
-:root[data-tema="oscuro"] .burbuja-4 {
+:root[data-tema="oscuro"] .mancha-4 {
     background: radial-gradient(circle at 50% 50%, rgba(60, 60, 112, .70), rgba(60, 60, 112, 0) 70%);
 }
 
@@ -993,7 +993,7 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
     overflow: hidden; pointer-events: none;
 }
 
-.fondo-lava .burbuja {
+.fondo-lava .mancha {
     position: absolute;
     width: 46vmax; height: 46vmax;
     border-radius: 50%;
@@ -1002,42 +1002,59 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
 }
 
 /* En claro, tintes de marca apenas insinuados. */
-.burbuja-1 {
-    left: -10vmax; top: -8vmax;
+.mancha-1 {
+    left: -18vmax; top: -14vmax;
     background: radial-gradient(circle at 50% 50%, rgba(248, 227, 227, .35), rgba(248, 227, 227, 0) 70%);
-    animation: deriva-1 34s ease-in-out infinite alternate;
+    animation: deriva-1 20s linear infinite;
 }
-.burbuja-2 {
-    right: -12vmax; top: 10vmax;
+.mancha-2 {
+    right: -16vmax; top: -4vmax;
     background: radial-gradient(circle at 50% 50%, rgba(226, 232, 240, .36), rgba(226, 232, 240, 0) 70%);
-    animation: deriva-2 42s ease-in-out infinite alternate;
+    animation: deriva-2 26s linear infinite;
 }
-.burbuja-3 {
-    left: 18vmax; bottom: -16vmax;
+.mancha-3 {
+    left: -6vmax; bottom: -22vmax;
     background: radial-gradient(circle at 50% 50%, rgba(253, 230, 214, .38), rgba(253, 230, 214, 0) 70%);
-    animation: deriva-3 38s ease-in-out infinite alternate;
+    animation: deriva-3 23s linear infinite;
 }
-.burbuja-4 {
-    right: 6vmax; bottom: 4vmax;
+.mancha-4 {
+    right: -8vmax; bottom: -18vmax;
     background: radial-gradient(circle at 50% 50%, rgba(232, 234, 246, .40), rgba(232, 234, 246, 0) 70%);
-    animation: deriva-4 46s ease-in-out infinite alternate;
+    animation: deriva-4 29s linear infinite;
 }
 
+/* Recorrido cerrado de cuatro puntos: vuelve al inicio, asi "linear infinite"
+   enlaza sin salto. Antes usaba ease-in-out con alternate, y eso frenaba del todo
+   en cada extremo y arrancaba casi quieto: en los primeros segundos parecia
+   estatico. Con un circuito y velocidad constante, siempre se esta moviendo. */
+
 @keyframes deriva-1 {
-    from { transform: translate3d(0, 0, 0) scale(1); }
-    to { transform: translate3d(18vmax, 12vmax, 0) scale(1.25); }
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    25%  { transform: translate3d(26vmax, 10vmax, 0) scale(1.2); }
+    50%  { transform: translate3d(34vmax, 30vmax, 0) scale(.95); }
+    75%  { transform: translate3d(8vmax, 26vmax, 0) scale(1.15); }
+    100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 @keyframes deriva-2 {
-    from { transform: translate3d(0, 0, 0) scale(1.1); }
-    to { transform: translate3d(-16vmax, 20vmax, 0) scale(.85); }
+    0%   { transform: translate3d(0, 0, 0) scale(1.1); }
+    25%  { transform: translate3d(-22vmax, 18vmax, 0) scale(.9); }
+    50%  { transform: translate3d(-34vmax, 38vmax, 0) scale(1.2); }
+    75%  { transform: translate3d(-10vmax, 20vmax, 0) scale(1); }
+    100% { transform: translate3d(0, 0, 0) scale(1.1); }
 }
 @keyframes deriva-3 {
-    from { transform: translate3d(0, 0, 0) scale(.9); }
-    to { transform: translate3d(22vmax, -14vmax, 0) scale(1.2); }
+    0%   { transform: translate3d(0, 0, 0) scale(.95); }
+    25%  { transform: translate3d(28vmax, -16vmax, 0) scale(1.25); }
+    50%  { transform: translate3d(40vmax, -34vmax, 0) scale(1); }
+    75%  { transform: translate3d(14vmax, -20vmax, 0) scale(1.1); }
+    100% { transform: translate3d(0, 0, 0) scale(.95); }
 }
 @keyframes deriva-4 {
-    from { transform: translate3d(0, 0, 0) scale(1.15); }
-    to { transform: translate3d(-20vmax, -10vmax, 0) scale(.9); }
+    0%   { transform: translate3d(0, 0, 0) scale(1.15); }
+    25%  { transform: translate3d(-24vmax, -14vmax, 0) scale(.9); }
+    50%  { transform: translate3d(-38vmax, -32vmax, 0) scale(1.2); }
+    75%  { transform: translate3d(-12vmax, -18vmax, 0) scale(1); }
+    100% { transform: translate3d(0, 0, 0) scale(1.15); }
 }
 
 /* El contenido va por encima del fondo. */
@@ -1045,5 +1062,5 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
 
 /* Quien pidio menos movimiento recibe el fondo quieto, no sin fondo. */
 @media (prefers-reduced-motion: reduce) {
-    .fondo-lava .burbuja { animation: none; }
+    .fondo-lava .mancha { animation: none; }
 }

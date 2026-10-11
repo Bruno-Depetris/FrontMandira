@@ -151,7 +151,17 @@ atmosféricos". Se agregó por pedido expreso, con tres cuidados:
   hay más margen. Si se suben, hay texto secundario que deja de cumplir AA.
 - **Solo se anima `transform`.** Nada de animar `filter` ni `background`, que obligan a
   repintar en cada cuadro.
-- **`prefers-reduced-motion` deja el fondo quieto**, no sin fondo.
+- **`prefers-reduced-motion` deja el fondo quieto**, no sin fondo. Si el fondo se ve lindo
+  pero inmóvil, eso es lo primero que hay que descartar: es la opción "reducir movimiento"
+  del sistema operativo.
+
+Cada mancha recorre un **circuito cerrado de cuatro puntos** a velocidad constante (`linear`,
+ciclos de 20 a 29 segundos), y vuelve al punto de partida para que el bucle enlace sin salto.
+El primer intento usaba `ease-in-out` con `alternate`, y eso frenaba del todo en cada extremo
+y arrancaba casi quieto: en los primeros segundos parecía estático.
+
+Las manchas se llaman `.mancha`, no `.burbuja`: esa clase ya era la del contador del carrito
+en la cabecera.
 
 Las tarjetas conservan su fondo opaco, así que el efecto se ve sobre todo por los márgenes
 y entre secciones.
