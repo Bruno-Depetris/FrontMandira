@@ -239,6 +239,7 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
 }
 
 .icono-tema { font-size: 15px; line-height: 1; }
+.icono-accion { flex: none; }
 
 .accion-carrito {
     background: var(--primary); color: var(--on-primary);
@@ -548,7 +549,10 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
     border-bottom: 1px solid var(--hairline);
 }
 
-.fila-nombre { font-size: 16px; font-weight: 600; color: var(--ink); }
+.fila-nombre {
+    display: flex; flex-direction: column; gap: 2px;
+    font-size: 16px; font-weight: 600; color: var(--ink);
+}
 .fila-nombre a:hover { text-decoration: underline; }
 
 .fila-unitario { font-size: 14px; color: var(--muted); }
@@ -886,23 +890,64 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
     .hero { grid-template-columns: 1fr; }
     .detalle, .checkout, .disposicion-cuenta { grid-template-columns: 1fr; gap: var(--e-xl); }
     .checkout-resumen { position: static; }
-    .disposicion-catalogo { grid-template-columns: 1fr; gap: var(--e-lg); }
+    /* Sin `min-width: 0` una celda de grilla toma el ancho de su contenido en vez
+       de recortarlo, y una tira que se desliza la estira sin limite. */
+    .disposicion-catalogo { grid-template-columns: minmax(0, 1fr); gap: var(--e-lg); }
+    .disposicion-catalogo > * { min-width: 0; }
 
-    /* Los filtros pasan a ser un nav-pill-group horizontal. */
-    .lista-filtros {
-        flex-direction: row; flex-wrap: wrap; gap: var(--e-xxs);
-        background: var(--surface-soft); border-radius: var(--r-pill); padding: 6px;
+    /* Los filtros pasan a ser una tira horizontal que se desliza, en vez de
+       envolverse. Envolviendose armaban una caja de 87px de alto con radio de
+       pildora, que no se leia como un grupo de filtros sino como un bloque
+       deforme, y empujaba los productos abajo del pliegue. En una sola linea
+       que se arrastra, el alto es constante y los productos empiezan arriba.
+
+       `scroll-snap` deja cada chip alineado al soltar. Nada de sangrar la tira
+       hasta el borde con margenes negativos: eso la hace mas ancha que su celda
+       de grilla y estira todo el documento, que es justo el desborde horizontal
+       que se queria evitar. */
+    .lista-filtros, .lista-subfiltros {
+        flex-direction: row; flex-wrap: nowrap; gap: var(--e-xxs);
+        overflow-x: auto; overscroll-behavior-x: contain;
+        scroll-snap-type: x proximity;
+        margin: 0; padding: 2px 0;
+        border: none;
+        scrollbar-width: none;
     }
-    .lista-filtros > li { flex: none; }
-    .lista-filtros > li > button { width: auto; border-radius: var(--r-pill); }
-    .lista-filtros > li > button.activo { background: var(--canvas); box-shadow: var(--sombra-1); }
-    .lista-subfiltros { flex-basis: 100%; flex-direction: row; flex-wrap: wrap; margin: var(--e-xs) 0 0; padding: 0; border: none; }
-    .lista-subfiltros button { width: auto; }
+    .lista-filtros::-webkit-scrollbar, .lista-subfiltros::-webkit-scrollbar { display: none; }
+
+    .lista-filtros > li, .lista-subfiltros > li { flex: none; scroll-snap-align: start; }
+    .lista-filtros button, .lista-subfiltros button {
+        width: auto; white-space: nowrap;
+        min-height: 40px; padding: var(--e-xs) var(--e-md);
+        border: 1px solid var(--hairline); border-radius: var(--r-pill);
+        background: var(--canvas);
+    }
+    .lista-filtros button.activo, .lista-subfiltros button.activo {
+        background: var(--ink); border-color: var(--ink); color: var(--canvas);
+    }
+    .lista-subfiltros { margin-top: var(--e-xs); }
+    .lista-subfiltros button { font-size: 13px; min-height: 36px; }
+
+    #filtros h3 { margin-bottom: var(--e-xs); }
 }
 
 @media (max-width: 760px) {
     h1 { font-size: 32px; letter-spacing: -1px; }
     h2 { font-size: 28px; letter-spacing: -.5px; }
+
+    /* Dos columnas, que es lo que cambia el catalogo de inusable a usable.
+       Con una sola columna cada tarjeta medi­a 508px de alto y los 44 productos
+       sumaban 22.405px de scroll: veintiseis pantallas de telefono para recorrer
+       el catalogo. A dos columnas y con la foto en cuadrado en vez de 4/3, la
+       misma lista entra en poco mas de un tercio de eso. */
+    .grilla { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-sm); }
+    .tarjeta-imagen { aspect-ratio: 1 / 1; }
+    .tarjeta-cuerpo { padding: var(--e-sm); gap: 2px; }
+    .tarjeta-cuerpo h3 { font-size: 14px; line-height: 1.35; }
+    .tarjeta-rubro { font-size: 11px; }
+    .tarjeta-precio { font-size: 16px; }
+    .tarjeta-cuerpo .boton-sutil { margin-top: var(--e-xs); min-height: 40px; }
+    .etiqueta-agotado, .etiqueta-leyenda { font-size: 11px; padding: 3px 8px; }
 
     .seccion { padding: var(--e-xl) var(--e-md); }
     .hero { padding: var(--e-xl) var(--e-md); }
@@ -910,7 +955,8 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
     .hero p { font-size: 16px; }
 
     .cabecera-interior { gap: var(--e-sm); padding: 0 var(--e-md); }
-    .boton-menu { display: grid; place-items: center; }
+    /* 40px es el minimo para tocar con el pulgar sin errarle; antes media 36x29. */
+    .boton-menu { display: grid; place-items: center; width: 40px; height: 40px; flex: none; }
     .busqueda { display: none; }
 
     .navegacion {
@@ -925,7 +971,14 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
     .navegacion.abierta { display: flex; }
     .nav-enlace { padding: var(--e-sm) var(--e-md); border-radius: var(--r-md); }
 
-    .accion { padding: 0 var(--e-sm); font-size: 13px; }
+    .accion { padding: 0 var(--e-xs); font-size: 13px; }
+    .nav-enlace { min-height: 44px; display: flex; align-items: center; }
+
+    /* Las pestañas de ingreso y la casilla de "recordarme" tambien son objetivos
+       de dedo: median 36 y 13 de alto. */
+    .pestana-acceso { min-height: 44px; }
+    input[type="checkbox"], input[type="radio"] { width: 20px; height: 20px; }
+    label:has(> input[type="checkbox"]) { min-height: 44px; display: flex; align-items: center; gap: var(--e-xs); }
 
     /* En el telefono el encabezado no da para tres etiquetas enteras: con el texto
        completo la fila medi­a 438px sobre un viewport de 375 y aparecia scroll
@@ -933,12 +986,54 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
        con el icono (el aria-label sigue diciendo que hace) y la barra se achica el
        gap, que es lo justo para que entre hasta en 360px. */
     .cabecera-interior { gap: var(--e-xs); }
-    .acciones { gap: var(--e-xxs); }
-    .accion-tema .texto-accion { display: none; }
-    .accion-tema { padding: 0 var(--e-xs); }
+    .acciones { gap: var(--e-xxs); flex: none; }
 
-    .fila-carrito { grid-template-columns: 1fr auto; row-gap: var(--e-xs); }
-    .fila-unitario, .fila-subtotal { text-align: left; }
+    /* La marca es lo unico que puede ceder ancho. Sin esto el encabezado se arma
+       sumando anchos fijos y cualquier telefono mas angosto que la cuenta exacta
+       termina con scroll horizontal; con esto el nombre se recorta y nada
+       desborda, sea cual sea el ancho. El isologo nunca se achica. */
+    /* Al encabezado le faltaban 18px para entrar enteros en 373, y el unico que
+       podia ceder era el nombre de la marca: quedaba en "Ma...". En vez de
+       recortarlo se achican el tipo del nombre, su separacion del isologo y el
+       padding de los botones, que suman 24px y alcanzan de sobra. El recorte
+       queda igual como red por si el telefono es mas angosto todavia. */
+    .marca { flex: 0 1 auto; min-width: 32px; overflow: hidden; gap: var(--e-xs); }
+    .marca span {
+        font-size: 17px; letter-spacing: -.4px;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+    }
+    /* Tema y carrito se quedan con el icono. Con las dos palabras enteras la fila
+       media 399px sobre un viewport de 373 en cuanto aparecia la burbuja del
+       contador, y el telefono quedaba con scroll horizontal apenas se agregaba
+       algo al carrito. Los dos enlaces ya tienen aria-label, asi que esconder la
+       palabra no les saca el nombre accesible. */
+    .accion-tema .texto-accion, .accion-carrito .texto-accion { display: none; }
+    .accion-tema, .accion-carrito { padding: 0 var(--e-sm); }
+    .accion-carrito { gap: var(--e-xxs); }
+
+    /* En dos columnas la fila se ordena sola de forma rara (la cruz termina
+       suelta debajo de la cantidad). Con areas explicitas, la cruz va al lado del
+       nombre, que es lo que se quiere borrar, y abajo quedan la cantidad y su
+       importe, que es lo que se compara. */
+    .fila-carrito {
+        grid-template-columns: 1fr auto;
+        grid-template-areas: "nombre quitar" "cantidad subtotal";
+        row-gap: var(--e-sm); align-items: center;
+    }
+    .fila-nombre { grid-area: nombre; }
+    .fila-quitar { grid-area: quitar; align-self: start; }
+    /* Sin `justify-self` la celda lo estira a todo el ancho y el recuadro queda
+       con un vacio largo a la derecha de los botones. */
+    .fila-cantidad { grid-area: cantidad; justify-self: start; }
+    .fila-subtotal { grid-area: subtotal; }
+    .fila-unitario { text-align: left; }
+    .fila-subtotal { text-align: right; min-width: 0; }
+
+    /* 40px de lado: el menos, el mas y la cruz median 34 y 36, y en un telefono
+       eso es errarle y cambiar una cantidad sin querer. */
+    .fila-cantidad button { width: 40px; height: 40px; }
+    .fila-cantidad span { min-width: 40px; }
+    .fila-quitar { width: 40px; height: 40px; }
 
     .cta-banda { margin-bottom: var(--e-xl); padding: 0 var(--e-md); }
     .cta-banda-interior { padding: var(--e-xl) var(--e-lg); }

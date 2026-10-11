@@ -172,6 +172,34 @@ pastilla activa en blanco y sombra suave.
 
 ### En el teléfono
 
+Lo que hacía el catálogo inusable: a una sola columna, cada tarjeta medía 508px de alto y los 44
+productos sumaban **22.405px de scroll** — veintiséis pantallas de teléfono. Ahora son dos columnas
+con la foto en cuadrado: la misma lista entra en 8.587px.
+
+Los filtros se envolvían en una caja de 87px de alto con radio de píldora, que no se leía como un
+grupo de filtros y empujaba los productos abajo del pliegue. Pasaron a ser una tira horizontal que
+se desliza, de alto constante (44px), con `scroll-snap`. Nada de sangrarla hasta el borde con
+márgenes negativos: eso la hace más ancha que su celda de grilla y estira el documento entero.
+
+El encabezado desbordaba **apenas se agregaba algo al carrito**: la burbuja del contador sumaba
+20px y la fila pasaba a 402px sobre un viewport de 373, así que el teléfono quedaba con scroll
+horizontal. El botón del carrito se quedó con su ícono, como el de día/noche, y la marca es lo
+único que puede ceder ancho (se recorta con puntos suspensivos por debajo de ~370px). Los dos
+enlaces ya tenían `aria-label`, así que esconder la palabra no les saca el nombre accesible.
+
+Los objetivos de dedo que medían menos de 40px —el botón de menú (36x29), el − y el + del carrito
+(34x38), la cruz de quitar (36x36), las pestañas de ingreso (36) y la casilla de recordarme (13)—
+pasaron a 40px o más.
+
+La fila del carrito usa áreas de grilla explícitas: con dos columnas automáticas la cruz terminaba
+suelta debajo de la cantidad. Ahora la cruz va al lado del nombre, que es lo que se quiere borrar,
+y abajo quedan la cantidad y su importe, que es lo que se compara.
+
+Verificado en inicio, catálogo, detalle, carrito, checkout y cuenta, a 390, 360 y 320px, con un
+producto en el carrito.
+
+#### Lo anterior
+
 El encabezado entero no entra en un celular: con las tres etiquetas completas la fila medía
 438px sobre un viewport de 375 y aparecía scroll horizontal, que es lo que corría toda la
 página de los márgenes. Por debajo de 760px el botón de día/noche se queda **solo con el
