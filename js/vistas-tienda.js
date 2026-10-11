@@ -48,7 +48,18 @@ function conectarBotonesAgregar(raiz, porId) {
             return;
         }
 
-        agregar(producto, 1);
+        const resultado = agregar(producto, 1);
+
+        if(resultado.cantidad === 0) {
+            aviso("Ya no queda stock de " + producto.nombre + ".", "error");
+            return;
+        }
+
+        if(resultado.topeado) {
+            aviso("Solo quedan " + resultado.tope + " de " + producto.nombre + ".", "error");
+            return;
+        }
+
         aviso(producto.nombre + " se agregó al carrito.", "exito");
     });
 }
@@ -313,7 +324,7 @@ export async function vistaProducto(contenedor, parametros) {
             ? '<p class="marca-agotado">Por ahora no tenemos stock de este producto.</p>'
             : '<div class="detalle-compra">' +
               '<label for="cantidad">Cantidad</label>' +
-              '<input type="number" id="cantidad" value="1" min="1" max="' +
+              '<input type="number" id="cantidad" value="1" min="1" step="1" max="' +
               (producto.stock === null ? 99 : producto.stock) + '">' +
               '<button class="boton-primario" id="botonAgregar">Agregar al carrito</button>' +
               "</div>" +
@@ -346,8 +357,22 @@ export async function vistaProducto(contenedor, parametros) {
         botonAgregar.addEventListener("click", () => {
             const campo = contenedor.querySelector("#cantidad");
             const cantidad = Math.max(1, Number.parseInt(campo.value, 10) || 1);
+            const resultado = agregar(producto, cantidad);
 
-            agregar(producto, cantidad);
+            if(resultado.cantidad === 0) {
+                aviso("Ya no queda stock de " + producto.nombre + ".", "error");
+                return;
+            }
+
+            // Si hubo que recortar, se dice: cambiar el numero en silencio hace que
+            // el cliente crea que compro mas de lo que compro.
+            if(resultado.topeado) {
+                campo.value = resultado.cantidad;
+                aviso("Solo quedan " + resultado.tope + " de " + producto.nombre +
+                    ". El carrito tiene " + resultado.cantidad + ".", "error");
+                return;
+            }
+
             aviso(producto.nombre + " se agregó al carrito.", "exito");
         });
     }

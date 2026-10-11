@@ -1,13 +1,39 @@
 import { CONFIG } from "../config.js";
 import { api } from "./api.js";
-import { obtenerItems, fijarCantidad, quitar, importeTotal, vaciar, cantidadTotal } from "./carrito.js";
+import { cargarCatalogo } from "./datos.js";
+import { obtenerItems, fijarCantidad, quitar, importeTotal, vaciar, cantidadTotal,
+    sincronizarConCatalogo } from "./carrito.js";
 import { haySesion } from "./sesion.js";
 import { panelAcceso } from "./acceso.js";
 import { esc, moneda, cargando, panelError, vacio, aviso } from "./ui.js";
 
 // ------------------------------------------------------------------ carrito
 
-export function vistaCarrito(contenedor) {
+/**
+ * Confronta el carrito guardado con el catalogo y avisa cada ajuste. Si el
+ * catalogo no carga, se deja el carrito como esta: la API lo valida igual al
+ * confirmar, asi que no hay riesgo de vender de mas.
+ */
+async function ponerAlDia() {
+    let catalogo;
+
+    try {
+        catalogo = await cargarCatalogo();
+    } catch {
+        return;
+    }
+
+    for(const ajuste of sincronizarConCatalogo(catalogo.porId)) {
+        aviso(ajuste.nombre + ": " + ajuste.motivo + ".", "error");
+    }
+}
+
+
+export async function vistaCarrito(contenedor) {
+    // El carrito vive en localStorage y puede tener dias: antes de mostrarlo se
+    // confronta con el catalogo de hoy, por si cambio el stock o el precio.
+    await ponerAlDia();
+
     const items = obtenerItems();
 
     if(items.length === 0) {
@@ -57,7 +83,11 @@ export function vistaCarrito(contenedor) {
         }
 
         if(evento.target.closest("[data-mas]")) {
-            fijarCantidad(id, item.cantidad + 1);
+            const resultado = fijarCantidad(id, item.cantidad + 1);
+
+            if(resultado && resultado.topeado) {
+                aviso("De " + item.nombre + " quedan " + resultado.tope + ".", "error");
+            }
         } else if(evento.target.closest("[data-menos]")) {
             fijarCantidad(id, item.cantidad - 1);
         } else if(evento.target.closest("[data-quitar]")) {
@@ -78,6 +108,8 @@ export function vistaCarrito(contenedor) {
 // ------------------------------------------------------------------ checkout
 
 export async function vistaCheckout(contenedor) {
+    await ponerAlDia();
+
     if(cantidadTotal() === 0) {
         contenedor.innerHTML = vacio(
             "No hay nada para comprar",
