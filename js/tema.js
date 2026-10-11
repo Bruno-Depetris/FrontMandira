@@ -86,7 +86,12 @@ export function conectarBotonDeTema(boton) {
     function refrescar() {
         const oscuro = temaActual() === "oscuro";
 
-        boton.textContent = oscuro ? "Modo claro" : "Modo oscuro";
+        // El icono siempre se ve; la etiqueta se esconde en pantalla chica, donde
+        // el encabezado no da para tres textos. El aria-label de abajo es el que
+        // nombra el boton, asi que esconder el texto no le saca accesibilidad.
+        boton.innerHTML = '<span class="icono-tema" aria-hidden="true">' +
+            (oscuro ? "\u2600" : "\u263E") + '</span>' +
+            '<span class="texto-accion">' + (oscuro ? "Modo claro" : "Modo oscuro") + "</span>";
         boton.setAttribute("aria-label", oscuro ? "Cambiar a modo claro" : "Cambiar a modo oscuro");
         boton.setAttribute("aria-pressed", String(oscuro));
     }

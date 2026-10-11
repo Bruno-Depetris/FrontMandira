@@ -238,6 +238,8 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
     font: 600 14px/1 var(--texto); cursor: pointer; white-space: nowrap;
 }
 
+.icono-tema { font-size: 15px; line-height: 1; }
+
 .accion-carrito {
     background: var(--primary); color: var(--on-primary);
     border: 1px solid var(--primary);
@@ -925,6 +927,16 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
 
     .accion { padding: 0 var(--e-sm); font-size: 13px; }
 
+    /* En el telefono el encabezado no da para tres etiquetas enteras: con el texto
+       completo la fila medi­a 438px sobre un viewport de 375 y aparecia scroll
+       horizontal, que es lo que corria toda la pagina. El cambio de tema se queda
+       con el icono (el aria-label sigue diciendo que hace) y la barra se achica el
+       gap, que es lo justo para que entre hasta en 360px. */
+    .cabecera-interior { gap: var(--e-xs); }
+    .acciones { gap: var(--e-xxs); }
+    .accion-tema .texto-accion { display: none; }
+    .accion-tema { padding: 0 var(--e-xs); }
+
     .fila-carrito { grid-template-columns: 1fr auto; row-gap: var(--e-xs); }
     .fila-unitario, .fila-subtotal { text-align: left; }
 
@@ -1057,8 +1069,13 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
     100% { transform: translate3d(0, 0, 0) scale(1.15); }
 }
 
-/* El contenido va por encima del fondo. */
-.cinta-anuncios, .cabecera, .contenido, .cta-banda, .pie, .avisos { position: relative; z-index: 1; }
+/* El contenido va por encima del fondo.
+
+   Los avisos quedan afuera a proposito: ya son `position: fixed` con su propio
+   z-index, y ponerlos en esta lista les pisaba el `fixed` con `relative`. Eso los
+   sacaba de la esquina y los metia en el flujo con `right: 16px` leido como
+   corrimiento, asi que el bloque terminaba 16px fuera del borde izquierdo. */
+.cinta-anuncios, .cabecera, .contenido, .cta-banda, .pie { position: relative; z-index: 1; }
 
 /* Quien pidio menos movimiento recibe el fondo quieto, no sin fondo. */
 @media (prefers-reduced-motion: reduce) {

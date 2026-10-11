@@ -170,6 +170,19 @@ El conmutador de *Ya tengo cuenta / Crear cuenta* y, en pantallas chicas, los fi
 catálogo usan el `nav-pill-group` del sistema: envoltorio gris de radio pastilla con la
 pastilla activa en blanco y sombra suave.
 
+### En el teléfono
+
+El encabezado entero no entra en un celular: con las tres etiquetas completas la fila medía
+438px sobre un viewport de 375 y aparecía scroll horizontal, que es lo que corría toda la
+página de los márgenes. Por debajo de 760px el botón de día/noche se queda **solo con el
+ícono** (su `aria-label` sigue nombrando lo que hace, así que no pierde accesibilidad) y la
+barra achica el gap. Con eso entra hasta en 345px.
+
+El otro causante era la regla de apilado del fondo animado, que listaba `.avisos` y le pisaba
+su `position: fixed` con `relative`: los avisos salían de la esquina, entraban al flujo y el
+`right: 16px` pasaba a leerse como corrimiento, dejando el bloque 16px fuera del borde
+izquierdo. `.avisos` ya tiene su propio `z-index`, así que no necesita estar en esa lista.
+
 ## Cómo está armada
 
 | Archivo | Qué hace |
