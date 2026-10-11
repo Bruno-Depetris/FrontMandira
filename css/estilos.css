@@ -878,6 +878,34 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
     font-size: 13px; color: var(--muted-soft);
 }
 
+/* ------------------------------------------------------------ tipeo del titulo
+
+   El cursor es un borde derecho que parpadea, no un caracter: un "|" de texto se
+   copia al seleccionar el titulo y lo lee el lector de pantalla. */
+.tipeo {
+    border-right: 2px solid var(--ink);
+    padding-right: 2px;
+    animation: latido-cursor 1s steps(2, start) infinite;
+}
+
+@keyframes latido-cursor {
+    to { border-right-color: transparent; }
+}
+
+/* El titulo completo queda en el DOM para los lectores de pantalla: lo que se
+   anima va con aria-hidden, porque leer letra por letra no es leer. */
+.solo-lectores {
+    position: absolute; width: 1px; height: 1px;
+    margin: -1px; padding: 0; border: 0;
+    overflow: hidden; white-space: nowrap;
+    clip-path: inset(50%);
+}
+
+/* Quien pidio menos movimiento ve la frase quieta, sin cursor que parpadee. */
+@media (prefers-reduced-motion: reduce) {
+    .tipeo { border-right-color: transparent; animation: none; }
+}
+
 /* ============================================================ responsive */
 
 @media (max-width: 1024px) {

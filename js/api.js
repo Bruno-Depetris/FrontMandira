@@ -131,6 +131,7 @@ export const api = {
     formasDePago: () => pedir("GET", "/api/FormaPagos"),
     entregas: () => pedir("GET", "/api/Entregas"),
     anuncios: () => pedir("GET", "/api/Anuncios"),
+    portada: () => pedir("GET", "/api/Portada"),
 
     // --- cuenta propia (correo y contrasena) ---
     registro: cuerpo => pedir("POST", "/api/Auth/registro", cuerpo),

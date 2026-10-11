@@ -87,6 +87,32 @@ Quien entró con Google puede ponerle una contraseña a su cuenta desde **Mi cue
 registrarse con un correo que ya existe se rechaza, porque el correo del registro no está
 verificado y permitirlo sería regalarle la cuenta a cualquiera que lo adivine.
 
+## La portada
+
+El titulo del inicio, su bajada, la etiqueta de la tarjeta del hero y qué producto va adentro
+**salen del panel** (`#portada`), no de `config.js`. Lo que quedó en `config.js` es el respaldo
+para cuando la API no contesta: un título es demasiado importante para que dependa de que la red
+responda, así que la portada nunca se muestra vacía.
+
+El título se escribe con efecto de **máquina de escribir** (`js/tipeo.js`). Si el panel cargó
+varias frases, rotan: se escribe una, se queda un momento, se borra y sigue la siguiente. Con una
+sola, se escribe y se queda quieta — no tendría sentido borrar algo que no se reemplaza por nada
+distinto.
+
+Dos cuidados que no son decorativos:
+
+- El `<h1>` **reserva de entrada el alto de la frase más larga**. Sin eso la página entera salta
+  en cada ciclo, porque un título de dos renglones pasa a uno mientras se borra.
+- El texto completo queda en el DOM para los lectores de pantalla, en un elemento visualmente
+  oculto, y lo que se anima lleva `aria-hidden`: leer letra por letra no es leer. El cursor es un
+  borde que parpadea, no un carácter `|`, porque un carácter se copiaría al seleccionar el título.
+
+Con `prefers-reduced-motion` se muestra la primera frase y no hay animación ni cursor.
+
+El producto destacado es el que eligió el panel. Si no eligieron ninguno, o si el elegido dejó de
+estar publicado, cae en el primero que tenga foto, y si ninguno la tiene, el primero igual: la
+tarjeta nunca queda vacía.
+
 ## Anuncios y leyendas
 
 Dos cosas que se configuran desde el panel y no tocan el código:

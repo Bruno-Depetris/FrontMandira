@@ -2,6 +2,8 @@ import { CONFIG } from "../config.js";
 import { cargarCatalogo, hayStock } from "./datos.js";
 import { agregar } from "./carrito.js";
 import { esc, moneda, cargando, panelError, vacio, aviso } from "./ui.js";
+import { api } from "./api.js";
+import { tipear } from "./tipeo.js";
 
 const SIN_FOTO = "Assets/isologo.png";
 
@@ -66,24 +68,37 @@ function conectarBotonesAgregar(raiz, porId) {
 
 // ------------------------------------------------------------------ inicio
 
+/** Frena el tipeo de la portada anterior al cambiar de pantalla. */
+let frenarTipeo = () => {};
+
 export async function vistaInicio(contenedor) {
+    frenarTipeo();
+
     // Hero 7/5: el titulo a la izquierda y a la derecha una tarjeta con un producto
     // real adentro. El sistema pide mostrar el producto, no una ilustracion de el.
+    //
+    // El titulo, el subtitulo, la etiqueta de la tarjeta y que producto va adentro
+    // salen del panel, no de config.js. Lo de config.js queda como respaldo para
+    // cuando la API no contesta: la portada no se muestra vacia por eso.
+    const portada = await traerPortada();
+
     contenedor.innerHTML =
         '<section class="hero">' +
         '<div class="hero-texto">' +
-        "<h1>" + esc(CONFIG.marca.lema) + "</h1>" +
-        "<p>" + esc(CONFIG.marca.descripcion) + "</p>" +
+        '<h1 id="heroTitulo"></h1>' +
+        "<p>" + esc(portada.subtitulo) + "</p>" +
         '<div class="hero-acciones">' +
         '<a class="boton-primario" href="#/catalogo">Ver catálogo</a>' +
         '<a class="boton-sutil" href="#/cuenta">Crear mi cuenta</a>' +
         "</div></div>" +
         '<div class="hero-artefacto" id="heroArtefacto">' +
         '<div class="hero-artefacto-cabecera">' +
-        '<img src="' + SIN_FOTO + '" alt=""><span>Recién llegado</span></div>' +
+        '<img src="' + SIN_FOTO + '" alt=""><span>' + esc(portada.etiqueta) + "</span></div>" +
         '<div class="hero-esqueleto"></div>' +
         "</div></section>" +
         '<section class="seccion"><h2>Destacados</h2><div id="destacados">' + cargando() + "</div></section>";
+
+    frenarTipeo = tipear(contenedor.querySelector("#heroTitulo"), portada.frases);
 
     const zona = contenedor.querySelector("#destacados");
     const artefacto = contenedor.querySelector("#heroArtefacto");
@@ -100,7 +115,7 @@ export async function vistaInicio(contenedor) {
             return;
         }
 
-        llenarArtefacto(artefacto, catalogo);
+        llenarArtefacto(artefacto, catalogo, portada.destacadoId);
         conectarBotonesAgregar(artefacto, catalogo.porId);
 
         const destacados = catalogo.productos.slice(0, 8);
@@ -113,12 +128,53 @@ export async function vistaInicio(contenedor) {
 }
 
 /**
- * Pone dentro de la tarjeta del hero el primer producto que tenga foto, y si
- * ninguno la tiene, el primero igual. Debajo, las categorias como insignias.
+ * Lee la portada de la API. Si falla, devuelve lo que la tienda mostraba cuando
+ * esto estaba escrito en el codigo: un titulo es demasiado importante para que
+ * dependa de que la red conteste.
  */
-function llenarArtefacto(artefacto, catalogo) {
+async function traerPortada() {
+    const respaldo = {
+        frases: [CONFIG.marca.lema],
+        subtitulo: CONFIG.marca.descripcion,
+        etiqueta: "Recién llegado",
+        destacadoId: null
+    };
+
+    try {
+        const fila = await api.portada();
+
+        if(!fila) {
+            return respaldo;
+        }
+
+        const frases = String(fila.titulo || "")
+            .split("\n")
+            .map(frase => frase.trim())
+            .filter(Boolean);
+
+        return {
+            frases: frases.length > 0 ? frases : respaldo.frases,
+            subtitulo: fila.subtitulo || respaldo.subtitulo,
+            etiqueta: fila.etiquetaDestacado || respaldo.etiqueta,
+            destacadoId: fila.productoDestacadoId || null
+        };
+    } catch {
+        return respaldo;
+    }
+}
+
+/**
+ * Pone dentro de la tarjeta del hero el producto que eligio el panel. Si no
+ * eligieron ninguno, o si el elegido dejo de estar publicado, cae en el primero
+ * que tenga foto, y si ninguno la tiene, el primero igual: la tarjeta nunca
+ * queda vacia. Debajo, las categorias como insignias.
+ */
+function llenarArtefacto(artefacto, catalogo, destacadoId) {
+    const destacado = destacadoId
+        ? catalogo.productos.find(producto => producto.id === Number(destacadoId))
+        : null;
     const conFoto = catalogo.productos.find(producto => producto.fotos.length > 0);
-    const elegido = conFoto || catalogo.productos[0];
+    const elegido = destacado || conFoto || catalogo.productos[0];
     const usadas = new Set(catalogo.productos.map(p => p.categoria && p.categoria.nombre).filter(Boolean));
 
     artefacto.querySelector(".hero-esqueleto").outerHTML =
