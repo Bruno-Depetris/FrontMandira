@@ -21,6 +21,7 @@ function tarjeta(producto) {
         (esPlaceholder ? ' class="placeholder"' : "") + ' loading="lazy"' +
         ' onerror="this.onerror=null;this.src=\'' + SIN_FOTO + '\';this.classList.add(\'placeholder\')">' +
         (agotado ? '<span class="etiqueta-agotado">Sin stock</span>' : "") +
+        (producto.leyenda ? '<span class="etiqueta-leyenda">' + esc(producto.leyenda) + "</span>" : "") +
         "</a>" +
         '<div class="tarjeta-cuerpo">' +
         (producto.categoria ? '<p class="tarjeta-rubro">' + esc(producto.categoria.nombre) + "</p>" : "") +
@@ -282,6 +283,7 @@ export async function vistaProducto(contenedor, parametros) {
     const imagenes = producto.fotos.length > 0 ? producto.fotos : [SIN_FOTO];
 
     contenedor.innerHTML =
+        '<div class="seccion">' +
         '<nav class="miga"><a href="#/catalogo">Catálogo</a>' +
         (producto.categoria ? " / " + esc(producto.categoria.nombre) : "") +
         (producto.subCategoria ? " / " + esc(producto.subCategoria.nombre) : "") +
@@ -298,7 +300,10 @@ export async function vistaProducto(contenedor, parametros) {
             : "") +
         "</div>" +
         '<div class="detalle-info">' +
-        (producto.categoria ? '<p class="tarjeta-rubro">' + esc(producto.categoria.nombre) + "</p>" : "") +
+        '<p class="rubro-detalle">' +
+        (producto.leyenda ? '<span class="insignia insignia-leyenda">' + esc(producto.leyenda) + "</span>" : "") +
+        (producto.categoria ? '<span class="tarjeta-rubro">' + esc(producto.categoria.nombre) + "</span>" : "") +
+        "</p>" +
         "<h1>" + esc(producto.nombre) + "</h1>" +
         '<p class="detalle-precio">' + moneda(producto.precio) + "</p>" +
         (producto.descripcion
@@ -315,7 +320,7 @@ export async function vistaProducto(contenedor, parametros) {
               (producto.stock !== null && producto.stock <= 5
                   ? '<p class="poco-stock">Quedan ' + producto.stock + " unidades.</p>"
                   : "")) +
-        "</div></section>";
+        "</div></section></div>";
 
     const miniaturas = contenedor.querySelector(".miniaturas");
 

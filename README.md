@@ -87,6 +87,20 @@ Quien entró con Google puede ponerle una contraseña a su cuenta desde **Mi cue
 registrarse con un correo que ya existe se rechaza, porque el correo del registro no está
 verificado y permitirlo sería regalarle la cuenta a cualquiera que lo adivine.
 
+## Anuncios y leyendas
+
+Dos cosas que se configuran desde el panel y no tocan el código:
+
+**La cinta de anuncios** es la barra de arriba de todo (`js/anuncios.js`). Los mensajes viven
+en `/api/Anuncios`, que es público porque la página los muestra sin login. Solo salen los que
+están **activos**, en el **orden** que les pongas, y si hay varios rotan cada cinco segundos.
+Cada uno puede llevar un enlace opcional. Si no hay ninguno activo la cinta no existe, y si
+la API no responde tampoco aparece: un anuncio no vale romper la tienda.
+
+**La leyenda del producto** es una etiqueta corta (`productos.leyenda`, hasta 40 caracteres)
+que sale sobre la foto en la grilla y junto al rubro en la ficha: "Oferta", "Nuevo", "2x1".
+Se carga en el editor del producto. Vacía significa que ese producto no lleva ninguna.
+
 ## Diseño
 
 La tienda implementa el sistema de `DESIGN-cal.md` (el análisis de Cal.com). Todo vive en
@@ -134,6 +148,8 @@ pastilla activa en blanco y sombra suave.
 | `js/sesion.js` | Guarda el token de la sesión (de Google o de la API), lo decodifica y lo vence solo. |
 | `js/auth.js` | Carga el SDK de Google y dibuja el botón oficial de ingreso. |
 | `js/acceso.js` | Panel de ingreso compartido: botón de Google + formularios de login y registro. |
+| `js/anuncios.js` | La cinta de mensajes de arriba, configurable desde el panel. |
+| `js/tema.js` | Modo día y noche. |
 | `js/api.js` | Cliente HTTP; agrega el `Bearer` y traduce los errores de la API. |
 | `js/datos.js` | Cache del catálogo: cruza productos, categorías, fotos y stock. |
 | `js/carrito.js` | Carrito en `localStorage` con sus totales. |

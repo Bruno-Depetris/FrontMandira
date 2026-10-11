@@ -457,12 +457,19 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
 /* ============================================================ detalle */
 
 .miga { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: var(--e-lg); }
+.seccion > .miga:first-child { margin-top: 0; }
 .miga a:hover { color: var(--ink); text-decoration: underline; }
 
-.detalle { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-xxl); align-items: start; }
+.detalle {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--e-xxl); align-items: start;
+}
+.detalle-info { padding-top: var(--e-xs); }
 
 .detalle-galeria img {
-    width: 100%; aspect-ratio: 4 / 3; object-fit: cover;
+    width: 100%; aspect-ratio: 1; object-fit: cover;
+    /* Con tope: sin esto, en pantalla grande la foto ocupaba media ventana. */
+    max-height: 560px;
     background: var(--surface-card);
     border: 1px solid var(--hairline);
     border-radius: var(--r-xl);
@@ -912,3 +919,40 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
     .pie-interior { grid-template-columns: 1fr; gap: var(--e-lg); }
     .pie { padding: var(--e-xl) 0; }
 }
+
+/* ------------------------------------------------------------ cinta de anuncios */
+
+/* Arriba de todo, antes de la cabecera. Un solo mensaje a la vez: rotar es menos
+   molesto que apilar varios en una barra que esta siempre a la vista. */
+.cinta-anuncios {
+    background: var(--ink);
+    color: var(--canvas);
+    font-size: 14px; font-weight: 600; text-align: center;
+}
+
+.cinta-interior {
+    position: relative;
+    max-width: var(--ancho); margin: 0 auto; padding: 10px var(--e-lg);
+    min-height: 40px; display: grid; place-items: center;
+}
+
+.cinta-interior .anuncio {
+    grid-area: 1 / 1;
+    opacity: 0; visibility: hidden;
+    transition: opacity .35s;
+}
+.cinta-interior .anuncio.visible { opacity: 1; visibility: visible; }
+.cinta-anuncios a { text-decoration: underline; }
+
+/* ------------------------------------------------------------ leyenda del producto */
+
+.etiqueta-leyenda {
+    position: absolute; right: var(--e-sm); top: var(--e-sm);
+    padding: 4px 12px;
+    background: var(--ink); color: var(--canvas);
+    border-radius: var(--r-pill);
+    font-size: 13px; font-weight: 600; line-height: 1.4;
+}
+
+.rubro-detalle { display: flex; align-items: center; gap: var(--e-xs); flex-wrap: wrap; margin-bottom: var(--e-xs); }
+.insignia-leyenda { background: var(--ink); color: var(--canvas); font-weight: 600; }

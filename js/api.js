@@ -130,6 +130,7 @@ export const api = {
     fotos: () => pedir("GET", "/api/Fotos"),
     formasDePago: () => pedir("GET", "/api/FormaPagos"),
     entregas: () => pedir("GET", "/api/Entregas"),
+    anuncios: () => pedir("GET", "/api/Anuncios"),
 
     // --- cuenta propia (correo y contrasena) ---
     registro: cuerpo => pedir("POST", "/api/Auth/registro", cuerpo),

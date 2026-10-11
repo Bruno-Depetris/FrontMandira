@@ -6,6 +6,7 @@ import { alCambiarCarrito, cantidadTotal } from "./carrito.js";
 import { alCambiarSesion, usuarioActual } from "./sesion.js";
 import { esc } from "./ui.js";
 import { iniciarTema, conectarBotonDeTema } from "./tema.js";
+import { montarAnuncios } from "./anuncios.js";
 
 const contenido = document.getElementById("contenido");
 
@@ -141,6 +142,7 @@ window.addEventListener("hashchange", enrutar);
 
 iniciarTema();
 conectarBotonDeTema(document.getElementById("botonTema"));
+montarAnuncios(document.getElementById("cintaAnuncios"));
 conectarMenuMovil();
 conectarBusquedaDeCabecera();
 refrescarCarritoEnCabecera();
