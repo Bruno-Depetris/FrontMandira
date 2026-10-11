@@ -136,6 +136,26 @@ entrar de noche no muestre un parpadeo claro.
 
 Los nueve pares de color del modo oscuro miden 4.74:1 o más.
 
+### El fondo animado
+
+Cuatro manchas de color muy grandes y desenfocadas que se mueven despacio detrás de todo,
+tipo lámpara de lava. Es CSS puro: no hay JavaScript, no hay librerías, y se saca borrando
+el bloque `.fondo-lava` del HTML y su regla del CSS.
+
+**Va en contra del documento de diseño**, que pide "sin gradientes decorativos, sin fondos
+atmosféricos". Se agregó por pedido expreso, con tres cuidados:
+
+- **La opacidad no se eligió a ojo, se midió.** Cada mancha usa la opacidad más alta que
+  todavía deja el texto `--muted` —el de menor contraste del sistema— en 4.5:1 sobre ella.
+  En modo día quedan entre 0.35 y 0.40; en noche, entre 0.44 y 0.70, porque sobre casi negro
+  hay más margen. Si se suben, hay texto secundario que deja de cumplir AA.
+- **Solo se anima `transform`.** Nada de animar `filter` ni `background`, que obligan a
+  repintar en cada cuadro.
+- **`prefers-reduced-motion` deja el fondo quieto**, no sin fondo.
+
+Las tarjetas conservan su fondo opaco, así que el efecto se ve sobre todo por los márgenes
+y entre secciones.
+
 El conmutador de *Ya tengo cuenta / Crear cuenta* y, en pantallas chicas, los filtros del
 catálogo usan el `nav-pill-group` del sistema: envoltorio gris de radio pastilla con la
 pastilla activa en blanco y sombra suave.

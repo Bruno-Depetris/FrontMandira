@@ -30,6 +30,17 @@
 </head>
 <body>
 
+<!-- Fondo animado, detras de todo. Es decorativo puro: aria-hidden para que los
+     lectores de pantalla lo ignoren, y pointer-events ninguno para que no robe
+     clics. Si alguna vez molesta, se saca borrando este bloque y la regla
+     .fondo-lava del CSS: no hay JavaScript involucrado. -->
+<div class="fondo-lava" aria-hidden="true">
+    <span class="burbuja burbuja-1"></span>
+    <span class="burbuja burbuja-2"></span>
+    <span class="burbuja burbuja-3"></span>
+    <span class="burbuja burbuja-4"></span>
+</div>
+
 <!-- Cinta de anuncios. Arranca oculta: la llena js/anuncios.js con lo que haya
      cargado el panel, y si no hay nada activo no se muestra. -->
 <div class="cinta-anuncios" id="cintaAnuncios" hidden></div>

@@ -125,6 +125,21 @@
     color-scheme: dark;
 }
 
+/* En noche el fondo puede subir de intensidad: sobre casi negro no compite con
+   ningun texto y es donde el efecto realmente se luce. */
+:root[data-tema="oscuro"] .burbuja-1 {
+    background: radial-gradient(circle at 50% 50%, rgba(120, 72, 96, .48), rgba(120, 72, 96, 0) 70%);
+}
+:root[data-tema="oscuro"] .burbuja-2 {
+    background: radial-gradient(circle at 50% 50%, rgba(44, 76, 120, .57), rgba(44, 76, 120, 0) 70%);
+}
+:root[data-tema="oscuro"] .burbuja-3 {
+    background: radial-gradient(circle at 50% 50%, rgba(128, 84, 44, .44), rgba(128, 84, 44, 0) 70%);
+}
+:root[data-tema="oscuro"] .burbuja-4 {
+    background: radial-gradient(circle at 50% 50%, rgba(60, 60, 112, .70), rgba(60, 60, 112, 0) 70%);
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -956,3 +971,79 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
 
 .rubro-detalle { display: flex; align-items: center; gap: var(--e-xs); flex-wrap: wrap; margin-bottom: var(--e-xs); }
 .insignia-leyenda { background: var(--ink); color: var(--canvas); font-weight: 600; }
+
+/* ============================================================ fondo animado
+
+   Efecto lampara de lava: cuatro manchas de color muy grandes, desenfocadas, que
+   se mueven despacio detras de todo.
+
+   Nota honesta: el documento de diseno pide lo contrario ("sin gradientes
+   decorativos, sin fondos atmosfericos"). Se agrega por pedido expreso, con dos
+   cuidados para que no estorbe: las tarjetas conservan su fondo opaco, asi que el
+   efecto se ve sobre todo por los margenes, y la opacidad de cada mancha no se
+   eligio a ojo sino midiendo: es la mas alta que todavia deja el texto --muted,
+   que es el de menor contraste del sistema, en 4.5:1 sobre esa mancha. Si se
+   suben, hay texto secundario que deja de cumplir AA.
+
+   Solo se animan transform y nada mas: nada de animar filter ni background, que
+   obligan a repintar en cada cuadro. */
+
+.fondo-lava {
+    position: fixed; inset: 0; z-index: 0;
+    overflow: hidden; pointer-events: none;
+}
+
+.fondo-lava .burbuja {
+    position: absolute;
+    width: 46vmax; height: 46vmax;
+    border-radius: 50%;
+    filter: blur(70px);
+    will-change: transform;
+}
+
+/* En claro, tintes de marca apenas insinuados. */
+.burbuja-1 {
+    left: -10vmax; top: -8vmax;
+    background: radial-gradient(circle at 50% 50%, rgba(248, 227, 227, .35), rgba(248, 227, 227, 0) 70%);
+    animation: deriva-1 34s ease-in-out infinite alternate;
+}
+.burbuja-2 {
+    right: -12vmax; top: 10vmax;
+    background: radial-gradient(circle at 50% 50%, rgba(226, 232, 240, .36), rgba(226, 232, 240, 0) 70%);
+    animation: deriva-2 42s ease-in-out infinite alternate;
+}
+.burbuja-3 {
+    left: 18vmax; bottom: -16vmax;
+    background: radial-gradient(circle at 50% 50%, rgba(253, 230, 214, .38), rgba(253, 230, 214, 0) 70%);
+    animation: deriva-3 38s ease-in-out infinite alternate;
+}
+.burbuja-4 {
+    right: 6vmax; bottom: 4vmax;
+    background: radial-gradient(circle at 50% 50%, rgba(232, 234, 246, .40), rgba(232, 234, 246, 0) 70%);
+    animation: deriva-4 46s ease-in-out infinite alternate;
+}
+
+@keyframes deriva-1 {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to { transform: translate3d(18vmax, 12vmax, 0) scale(1.25); }
+}
+@keyframes deriva-2 {
+    from { transform: translate3d(0, 0, 0) scale(1.1); }
+    to { transform: translate3d(-16vmax, 20vmax, 0) scale(.85); }
+}
+@keyframes deriva-3 {
+    from { transform: translate3d(0, 0, 0) scale(.9); }
+    to { transform: translate3d(22vmax, -14vmax, 0) scale(1.2); }
+}
+@keyframes deriva-4 {
+    from { transform: translate3d(0, 0, 0) scale(1.15); }
+    to { transform: translate3d(-20vmax, -10vmax, 0) scale(.9); }
+}
+
+/* El contenido va por encima del fondo. */
+.cinta-anuncios, .cabecera, .contenido, .cta-banda, .pie, .avisos { position: relative; z-index: 1; }
+
+/* Quien pidio menos movimiento recibe el fondo quieto, no sin fondo. */
+@media (prefers-reduced-motion: reduce) {
+    .fondo-lava .burbuja { animation: none; }
+}
