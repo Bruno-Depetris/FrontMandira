@@ -4,6 +4,7 @@ import { agregar } from "./carrito.js";
 import { esc, moneda, cargando, panelError, vacio, aviso } from "./ui.js";
 import { api } from "./api.js";
 import { tipear } from "./tipeo.js";
+import { activarRelieve } from "./relieve.js";
 
 const SIN_FOTO = "Assets/isologo.png";
 
@@ -121,6 +122,7 @@ export async function vistaInicio(contenedor) {
         const destacados = catalogo.productos.slice(0, 8);
         zona.innerHTML = '<div class="grilla">' + destacados.map(tarjeta).join("") + "</div>";
         conectarBotonesAgregar(zona, catalogo.porId);
+        activarRelieve(zona);
     } catch(error) {
         artefacto.remove();
         zona.innerHTML = panelError("No pudimos cargar los productos", error.message);
@@ -318,6 +320,7 @@ export async function vistaCatalogo(contenedor, parametros) {
     });
 
     conectarBotonesAgregar(zonaResultados, catalogo.porId);
+    activarRelieve(zonaResultados);
     refrescar();
 }
 

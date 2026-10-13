@@ -74,9 +74,50 @@
     --e-xxl: 48px;
     --e-section: 96px;
 
-    /* --- elevacion --- */
-    --sombra-1: 0 1px 2px rgba(0, 0, 0, .05);
-    --sombra-2: 0 4px 12px rgba(0, 0, 0, .08);
+    /* --- elevacion ---
+
+       Una sombra sola se lee como una mancha pegada al objeto. Las de abajo van en
+       tres partes, que es lo que hace que la profundidad se lea como profundidad:
+
+         1. un contacto corto y oscuro, el punto donde el objeto toca la superficie;
+         2. una difusa y larga, la sombra real;
+         3. un filete claro arriba (inset), que es la luz pegandole al canto.
+
+       La luz viene siempre de arriba. Si una sombra sale hacia otro lado, el ojo
+       lee dos fuentes de luz y la escena deja de ser creible. */
+    --sombra-1:
+        0 1px 2px rgba(17, 17, 17, .06),
+        0 1px 1px rgba(17, 17, 17, .04);
+    --sombra-2:
+        0 2px 4px rgba(17, 17, 17, .05),
+        0 6px 16px -4px rgba(17, 17, 17, .10);
+    --sombra-3:
+        0 4px 8px -2px rgba(17, 17, 17, .06),
+        0 16px 32px -8px rgba(17, 17, 17, .14);
+    --sombra-4:
+        0 8px 16px -4px rgba(17, 17, 17, .08),
+        0 32px 56px -16px rgba(17, 17, 17, .18);
+
+    /* El canto iluminado. Va como borde interior, no como border, para no sumar
+       al tamaño de la caja ni pelearse con el radio. */
+    --canto: inset 0 1px 0 rgba(255, 255, 255, .9);
+    --canto-tenue: inset 0 1px 0 rgba(255, 255, 255, .6);
+
+    /* Gradiente de superficie: apenas 2% de diferencia entre arriba y abajo. Es
+       lo que separa una tarjeta "con volumen" de un rectangulo plano, y a la vez
+       lo bastante poco como para no leerse como un degrade decorativo. */
+    --relleno-superficie: linear-gradient(180deg, #ffffff 0%, #fbfbfc 100%);
+
+    /* El hundido arranca en #f9fafb y no en un gris mas marcado por una razon
+       medida, no estetica: sobre #f3f4f6 el token --muted cae a 4.39:1 y deja de
+       cumplir AA. En #f9fafb da 4.63:1. Lo que hace leer el hueco es la sombra
+       interior, no lo oscuro del relleno, asi que no se pierde nada. */
+    --relleno-hundido: linear-gradient(180deg, #f9fafb 0%, #fdfdfe 100%);
+
+    /* La curva del movimiento. Sale rapido y frena suave, que es como se mueve
+       algo con masa. */
+    --curva: cubic-bezier(.22, 1, .36, 1);
+    --tiempo: 260ms;
 
     --display: "Manrope", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --texto: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -115,6 +156,29 @@
     --surface-dark-elevated: #161616;
     --hairline: #2d2d2d;
     --hairline-soft: #242424;
+
+    /* En oscuro la sombra casi no se ve: sobre #121212 no hay contraste contra que
+       proyectar. La profundidad la carga entonces el canto iluminado, que es la
+       otra mitad del mismo efecto, y las sombras se mantienen solo para despegar
+       el objeto del fondo. */
+    --sombra-1:
+        0 1px 2px rgba(0, 0, 0, .40),
+        0 1px 1px rgba(0, 0, 0, .30);
+    --sombra-2:
+        0 2px 4px rgba(0, 0, 0, .40),
+        0 6px 16px -4px rgba(0, 0, 0, .50);
+    --sombra-3:
+        0 4px 8px -2px rgba(0, 0, 0, .45),
+        0 16px 32px -8px rgba(0, 0, 0, .60);
+    --sombra-4:
+        0 8px 16px -4px rgba(0, 0, 0, .50),
+        0 32px 56px -16px rgba(0, 0, 0, .70);
+
+    --canto: inset 0 1px 0 rgba(255, 255, 255, .10);
+    --canto-tenue: inset 0 1px 0 rgba(255, 255, 255, .06);
+
+    --relleno-superficie: linear-gradient(180deg, #1e1e1e 0%, #181818 100%);
+    --relleno-hundido: linear-gradient(180deg, #141414 0%, #191919 100%);
 
     /* Sobre fondo oscuro los semanticos necesitan subir, no bajar. */
     --error: #f87171;
@@ -168,12 +232,17 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
 
 /* ============================================================ cabecera */
 
+/* Pegada arriba, pero sin sombra hasta que haya algo debajo: una barra que
+   proyecta sombra sobre nada se lee como un error. La clase la pone js/app.js
+   cuando la pagina se movio. */
 .cabecera {
     position: sticky; top: 0; z-index: 40;
     height: 64px;
     background: var(--canvas);
     border-bottom: 1px solid var(--hairline);
+    transition: box-shadow var(--tiempo) var(--curva);
 }
+.cabecera.despegada { box-shadow: var(--sombra-3); }
 
 .cabecera-interior {
     max-width: var(--ancho); height: 100%;
@@ -312,11 +381,14 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
 
 /* El artefacto del hero: una tarjeta blanca con un producto real adentro, no una
    ilustracion. Es la traduccion del hero-app-mockup-card del sistema. */
+/* Es la pieza mas elevada de la pagina y la unica en el nivel 4: en un sistema de
+   profundidad, el nivel maximo tiene que ser uno solo. Si varias cosas flotan a
+   la misma altura, ninguna flota. */
 .hero-artefacto {
-    background: var(--canvas);
+    background: var(--relleno-superficie);
     border: 1px solid var(--hairline);
-    border-radius: var(--r-xl);
-    box-shadow: var(--sombra-2);
+    border-radius: 20px;
+    box-shadow: var(--sombra-4), var(--canto);
     padding: var(--e-lg);
 }
 
@@ -330,49 +402,88 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
 }
 .hero-artefacto-cabecera span { font-size: 13px; font-weight: 500; color: var(--muted); }
 
-.hero-artefacto .tarjeta { border: none; box-shadow: none; }
+/* Adentro del artefacto la tarjeta no se eleva de nuevo ni se inclina: ya esta
+   apoyada sobre algo que flota, y apilar elevaciones aplana las dos. */
+.hero-artefacto .tarjeta {
+    border: none; box-shadow: none; background: none; transform: none;
+}
+.hero-artefacto .tarjeta:hover { transform: none; box-shadow: none; }
 .hero-artefacto .tarjeta-cuerpo { padding: var(--e-md) 0 0; }
 
 .hero-esqueleto {
     aspect-ratio: 4 / 3;
     border-radius: var(--r-lg);
-    background: var(--surface-card);
+    background: var(--relleno-hundido);
+    box-shadow: inset 0 1px 3px rgba(17, 17, 17, .06);
 }
 
 .hero-rubros { display: flex; gap: var(--e-xs); flex-wrap: wrap; margin-top: var(--e-md); }
 
 /* badge-pill del sistema: etiqueta chica, fondo gris de tarjeta, radio pastilla. */
 .insignia {
-    display: inline-block; padding: 4px 12px;
-    background: var(--surface-card); color: var(--ink);
+    display: inline-block; padding: 5px 13px;
+    background: var(--relleno-superficie); color: var(--ink);
+    border: 1px solid var(--hairline);
     border-radius: var(--r-pill);
+    box-shadow: var(--sombra-1), var(--canto-tenue);
     font-size: 13px; font-weight: 500; line-height: 1.4;
 }
 
 /* ============================================================ botones */
 
+/* Los botones son fisicos: descansan sobre la pagina, se levantan al apuntarlos y
+   se hunden al apretarlos. Ese hundido importa mas que el resto — es la respuesta
+   tactil, lo que confirma que el click entro, y es lo que separa un boton que se
+   siente de uno dibujado. */
 .boton-primario, .boton-sutil {
     display: inline-flex; align-items: center; justify-content: center;
     gap: var(--e-xs);
-    height: 40px; padding: 12px 20px;
-    border-radius: var(--r-md);
+    height: 44px; padding: 12px 22px;
+    border-radius: var(--r-lg);
     font: 600 14px/1 var(--texto);
     cursor: pointer;
     border: 1px solid transparent;
+    transition: transform 140ms var(--curva), box-shadow 140ms var(--curva),
+                background-color 140ms var(--curva);
 }
 
-.boton-primario { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
-.boton-primario:hover:not(:disabled) { background: var(--primary-active); border-color: var(--primary-active); }
-.boton-primario:active:not(:disabled) { background: var(--primary-active); }
+.boton-primario {
+    background: var(--primary); color: var(--on-primary); border-color: var(--primary);
+    box-shadow: var(--sombra-2), inset 0 1px 0 rgba(255, 255, 255, .14);
+}
+.boton-primario:hover:not(:disabled) {
+    background: var(--primary-active); border-color: var(--primary-active);
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-3), inset 0 1px 0 rgba(255, 255, 255, .14);
+}
+.boton-primario:active:not(:disabled) {
+    background: var(--primary-active);
+    transform: translateY(1px);
+    box-shadow: var(--sombra-1), inset 0 2px 4px rgba(0, 0, 0, .22);
+}
 
-.boton-sutil { background: var(--canvas); color: var(--ink); border-color: var(--hairline); }
-.boton-sutil:hover:not(:disabled) { background: var(--surface-soft); }
+.boton-sutil {
+    background: var(--relleno-superficie); color: var(--ink); border-color: var(--hairline);
+    box-shadow: var(--sombra-1), var(--canto);
+}
+.boton-sutil:hover:not(:disabled) {
+    background: var(--surface-soft);
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-2), var(--canto);
+}
+.boton-sutil:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: inset 0 2px 4px rgba(17, 17, 17, .10);
+}
 
+/* Deshabilitado no se levanta ni se hunde: no responde porque no hace nada. */
 .boton-primario:disabled, .boton-sutil:disabled {
     background: var(--primary-disabled);
     border-color: var(--primary-disabled);
     color: var(--muted);
     cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
 }
 
 .ancho { width: 100%; }
@@ -385,22 +496,55 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
 }
 
 /* Blanca con filete, no gris: el sistema reserva la tarjeta gris para las
-   afirmaciones abstractas y la blanca para mostrar el producto de verdad. */
+   afirmaciones abstractas y la blanca para mostrar el producto de verdad.
+
+   La profundidad son tres cosas a la vez, y hace falta que esten las tres: el
+   relleno con gradiente (la cara que recibe la luz), el canto claro arriba (el
+   borde iluminado) y la sombra en capas (lo que proyecta). Con una sola se ve
+   plano con una mancha abajo.
+
+   La inclinacion la pone js/relieve.js en --rx y --ry. Si ese archivo no corre,
+   los valores caen en 0deg y la tarjeta igual sube: el efecto se degrada a algo
+   que sigue estando bien, en vez de romperse. */
 .tarjeta {
-    background: var(--canvas);
+    --rx: 0deg;
+    --ry: 0deg;
+    position: relative;
+    background: var(--relleno-superficie);
     border: 1px solid var(--hairline);
-    border-radius: var(--r-lg);
+    border-radius: var(--r-xl);
     overflow: hidden;
     display: flex; flex-direction: column;
-    box-shadow: var(--sombra-1);
+    box-shadow: var(--sombra-2), var(--canto);
+    transform: perspective(900px) translate3d(0, 0, 0);
+    transition: transform var(--tiempo) var(--curva), box-shadow var(--tiempo) var(--curva);
+    will-change: transform;
 }
-.tarjeta:hover { box-shadow: var(--sombra-2); }
+
+/* `hover: hover` deja afuera al telefono: sin cursor, el navegador deja el estado
+   :hover pegado despues de tocar y la tarjeta se quedaba levantada. */
+@media (hover: hover) and (pointer: fine) {
+    .tarjeta:hover {
+        transform: perspective(900px) translate3d(0, -6px, 0) rotateX(var(--rx)) rotateY(var(--ry));
+        box-shadow: var(--sombra-4), var(--canto);
+    }
+    .tarjeta:hover .tarjeta-imagen img { transform: scale(1.04); }
+}
+
+/* El foco de teclado tiene que verse igual de claro que el hover, porque es la
+   misma informacion para quien no usa mouse. */
+.tarjeta:focus-within {
+    box-shadow: var(--sombra-4), var(--canto), 0 0 0 2px var(--ink);
+}
 
 .tarjeta-imagen {
     position: relative; display: block;
     aspect-ratio: 4 / 3; background: var(--surface-card);
 }
-.tarjeta-imagen img { width: 100%; height: 100%; object-fit: cover; }
+.tarjeta-imagen img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform calc(var(--tiempo) * 1.5) var(--curva);
+}
 
 .tarjeta-imagen img.placeholder {
     object-fit: contain;
@@ -414,7 +558,7 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
     background: var(--canvas); color: var(--ink);
     border-radius: var(--r-pill);
     font-size: 13px; font-weight: 500; line-height: 1.4;
-    box-shadow: var(--sombra-1);
+    box-shadow: var(--sombra-2), var(--canto-tenue);
 }
 
 .tarjeta.agotada .tarjeta-imagen img { opacity: .5; }
@@ -559,7 +703,9 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
 
 .fila-cantidad {
     display: inline-flex; align-items: center;
-    border: 1px solid var(--hairline); border-radius: var(--r-md);
+    background: var(--relleno-superficie);
+    border: 1px solid var(--hairline); border-radius: var(--r-lg);
+    box-shadow: var(--sombra-1), var(--canto-tenue);
     overflow: hidden;
 }
 
@@ -568,7 +714,9 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
     border: none; background: var(--canvas); color: var(--ink);
     font: 600 15px/1 var(--texto); cursor: pointer;
 }
+.fila-cantidad button { transition: background-color 120ms var(--curva); }
 .fila-cantidad button:hover { background: var(--surface-soft); }
+.fila-cantidad button:active { background: var(--surface-strong); box-shadow: inset 0 2px 4px rgba(17, 17, 17, .12); }
 .fila-cantidad span { min-width: 34px; text-align: center; font-size: 14px; font-weight: 600; }
 
 .fila-subtotal { font-size: 16px; font-weight: 600; color: var(--ink); min-width: 90px; text-align: right; }
@@ -613,14 +761,28 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
 
 .req { color: var(--error-texto); }
 
+/* Un campo va al reves que un boton: hundido, no elevado. El boton sobresale
+   porque se aprieta; el campo es un hueco donde se mete algo. La sombra interior
+   es lo que lo dice sin una sola palabra.
+
+   Los 16px de tipo no son estetica: por debajo de eso Safari en iPhone hace zoom
+   solo al enfocar el campo, y la pagina queda corrida. */
 .campo input, .campo textarea, .campo select {
-    width: 100%; height: 40px; padding: 10px 14px;
-    background: var(--canvas); color: var(--ink);
+    width: 100%; height: 44px; padding: 10px 14px;
+    background: var(--relleno-hundido); color: var(--ink);
     border: 1px solid var(--hairline); border-radius: var(--r-md);
+    box-shadow: inset 0 1px 2px rgba(17, 17, 17, .06);
     font: 400 16px/1.5 var(--texto);
+    transition: box-shadow 140ms var(--curva), border-color 140ms var(--curva),
+                background-color 140ms var(--curva);
 }
 .campo textarea { height: auto; min-height: 88px; resize: vertical; }
-.campo input:focus, .campo textarea:focus, .campo select:focus { outline: none; border-color: var(--ink); }
+.campo input:focus, .campo textarea:focus, .campo select:focus {
+    outline: none;
+    background: var(--canvas);
+    border-color: var(--ink);
+    box-shadow: inset 0 1px 2px rgba(17, 17, 17, .04), 0 0 0 3px rgba(17, 17, 17, .08);
+}
 
 .opciones { display: flex; flex-direction: column; gap: var(--e-xs); }
 
@@ -634,7 +796,13 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
 .opcion:hover { background: var(--surface-soft); }
 .opcion input { accent-color: var(--primary); }
 .opcion small { color: var(--muted); }
-.opcion:has(input:checked) { border-color: var(--ink); background: var(--canvas); box-shadow: var(--sombra-1); }
+.opcion {
+    transition: transform 140ms var(--curva), box-shadow 140ms var(--curva);
+}
+.opcion:has(input:checked) {
+    border-color: var(--ink); background: var(--relleno-superficie);
+    box-shadow: var(--sombra-2), var(--canto);
+}
 
 .checkout-resumen {
     background: var(--surface-card);
@@ -810,8 +978,8 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
     display: flex; align-items: center; gap: var(--e-sm);
     padding: var(--e-sm) var(--e-md);
     background: var(--surface-dark); color: var(--on-dark);
-    border-radius: var(--r-md);
-    box-shadow: var(--sombra-2);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sombra-4), inset 0 1px 0 rgba(255, 255, 255, .10);
     font-size: 14px;
 }
 .aviso-exito { background: var(--surface-dark); border-left: 3px solid var(--success); }
@@ -974,7 +1142,13 @@ h3 { font-size: 22px; line-height: 1.3; letter-spacing: -.3px; font-family: var(
     .tarjeta-cuerpo h3 { font-size: 14px; line-height: 1.35; }
     .tarjeta-rubro { font-size: 11px; }
     .tarjeta-precio { font-size: 16px; }
-    .tarjeta-cuerpo .boton-sutil { margin-top: var(--e-xs); min-height: 40px; }
+    .tarjeta-cuerpo .boton-sutil { margin-top: var(--e-xs); min-height: 44px; }
+
+    /* En el telefono la tarjeta no se inclina ni se levanta: no hay cursor al que
+       inclinarse, y el :hover queda pegado despues de tocar. Se le deja la
+       elevacion quieta, que es la parte del efecto que si funciona sin puntero. */
+    .tarjeta { transform: none; box-shadow: var(--sombra-2), var(--canto); }
+    .tarjeta:active { transform: scale(.985); box-shadow: var(--sombra-1), var(--canto); }
     .etiqueta-agotado, .etiqueta-leyenda { font-size: 11px; padding: 3px 8px; }
 
     .seccion { padding: var(--e-xl) var(--e-md); }

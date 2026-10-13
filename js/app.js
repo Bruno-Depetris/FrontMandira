@@ -137,6 +137,36 @@ for(const id of ["enlaceWhatsappPie", "enlaceWhatsappCta"]) {
 }
 
 alCambiarCarrito(refrescarCarritoEnCabecera);
+/**
+ * La cabecera proyecta sombra solo cuando hay pagina debajo. Pegada arriba del
+ * todo, con la pagina sin mover, una sombra flotaria sobre nada.
+ *
+ * Se escucha con `passive` y se escribe solo cuando el estado cambia: el scroll
+ * dispara en cada cuadro y tocar la clase cada vez obliga al navegador a
+ * recalcular estilos sin necesidad.
+ */
+function conectarSombraDeCabecera() {
+    const cabecera = document.querySelector(".cabecera");
+
+    if(!cabecera) {
+        return;
+    }
+
+    let despegada = false;
+
+    function revisar() {
+        const ahora = window.scrollY > 4;
+
+        if(ahora !== despegada) {
+            despegada = ahora;
+            cabecera.classList.toggle("despegada", ahora);
+        }
+    }
+
+    window.addEventListener("scroll", revisar, { passive: true });
+    revisar();
+}
+
 alCambiarSesion(refrescarCuentaEnCabecera);
 window.addEventListener("hashchange", enrutar);
 
@@ -144,6 +174,7 @@ iniciarTema();
 conectarBotonDeTema(document.getElementById("botonTema"));
 montarAnuncios(document.getElementById("cintaAnuncios"));
 conectarMenuMovil();
+conectarSombraDeCabecera();
 conectarBusquedaDeCabecera();
 refrescarCarritoEnCabecera();
 refrescarCuentaEnCabecera();

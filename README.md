@@ -145,6 +145,46 @@ Lo que decidí al aplicarlo, con el porqué:
 | `--warning-texto` y `--error-texto` | Los semánticos del documento no llegan a 4.5:1 como texto sobre blanco (warning queda en 2.15:1 y error en 3.76:1). Sirven para bordes e iconos; cuando el color es texto se usan estas variantes, de 7.09:1 y 6.47:1. |
 | `--brand-accent` y `--badge-orange` quedan declarados sin uso | El sistema es casi monocromo en la capa de acción y prohíbe el acento en los CTAs. Quedan documentados para quien quiera extenderlo. |
 
+### Profundidad: la desviación grande
+
+`DESIGN-cal.md` pide superficies **planas**, sin degradados decorativos y con sombras apenas
+insinuadas. El sistema de profundidad que hay hoy lo **contradice de frente**, y se agregó a
+pedido explícito del dueño ("moderno, minimalista, estilo 3D"). Dejo acá cómo está construido
+para que se pueda revertir o ajustar sin leer todo el CSS.
+
+Cada superficie elevada son **tres cosas a la vez**, y hacen falta las tres: si falta una, se ve
+plano con una mancha abajo.
+
+1. **El relleno** (`--relleno-superficie`): un degradado vertical de apenas 2% entre arriba y
+   abajo. Es la cara que recibe la luz. Más que eso se lee como degradado decorativo.
+2. **El canto** (`--canto`): un filete claro arriba, como `inset` y no como `border`, para no
+   sumar al tamaño de la caja ni pelearse con el radio. Es la luz pegándole al borde.
+3. **La sombra** (`--sombra-1` a `--sombra-4`): en dos partes, un contacto corto y oscuro —el
+   punto donde el objeto toca— y una difusa y larga. Una sombra sola se lee como una mancha
+   pegada al objeto.
+
+**La luz viene siempre de arriba.** Si una sombra sale hacia otro lado, el ojo lee dos fuentes
+de luz y la escena deja de ser creíble.
+
+| Decisión | Motivo |
+| --- | --- |
+| Los **campos van hundidos**, no elevados | Un botón sobresale porque se aprieta; un campo es un hueco donde se mete algo. La sombra interior lo dice sin una palabra. |
+| El **artefacto del hero es el único en `--sombra-4`** | En un sistema de profundidad el nivel máximo tiene que ser uno solo. Si varias cosas flotan a la misma altura, ninguna flota. |
+| Adentro del hero la tarjeta **no se vuelve a elevar** | Ya está apoyada sobre algo que flota. Apilar elevaciones aplana las dos. |
+| `--relleno-hundido` arranca en `#f9fafb`, no en un gris más marcado | Medido, no estético: sobre `#f3f4f6` el token `--muted` cae a **4.39:1** y deja de cumplir AA. En `#f9fafb` da 4.63:1. Lo que hace leer el hueco es la sombra interior, no lo oscuro del relleno. |
+| En **oscuro** la profundidad la carga el canto | Sobre `#121212` no hay contraste contra el que proyectar una sombra. Las sombras quedan solo para despegar el objeto del fondo. |
+| La **inclinación es de 3 grados** y no más | Pasado eso la foto del producto se deforma y el efecto se lee como un truco. |
+| En el **teléfono no hay inclinación ni elevación al tocar** | Sin cursor no hay a dónde inclinarse, y el navegador deja el `:hover` pegado después de tocar: la tarjeta se quedaba levantada. Queda la elevación quieta, que es la parte que funciona sin puntero. |
+| La **cabecera proyecta sombra solo al scrollear** | Pegada arriba con la página sin mover, una sombra flotaría sobre nada. |
+
+`js/relieve.js` sólo escribe los dos ángulos en `--rx` y `--ry`. Si ese archivo no carga, las
+variables caen en `0deg` y la tarjeta igual sube: el efecto **se degrada, no se rompe**. No corre
+sin puntero fino ni con `prefers-reduced-motion`, y escribe dentro de un `requestAnimationFrame`
+porque `pointermove` dispara más seguido que los cuadros que la pantalla puede mostrar.
+
+Para revertir todo esto: borrar el bloque de elevación de `:root`, volver `--sombra-1`/`--sombra-2`
+a sus valores de una sola capa, y sacar el import de `relieve.js` en `js/vistas-tienda.js`.
+
 ### Modo día y noche
 
 El documento describe un sistema claro, así que la paleta oscura es una **derivación**, no
