@@ -295,6 +295,35 @@ izquierdo. `.avisos` ya tiene su propio `z-index`, así que no necesita estar en
 | `js/vistas-cuenta.js` | Perfil editable, contraseña e historial de pedidos. |
 | `js/app.js` | Router por hash y cabecera. |
 
+## Volver donde estabas
+
+El router hacía `scrollTo(0)` en **toda** navegación. En un catálogo de 44 productos, que en un
+teléfono mide más de 8.000px, eso significaba: bajás buscando, entrás a un producto, volvés… y
+aparecés arriba de todo, con todo el recorrido por hacer de nuevo.
+
+`js/memoria-scroll.js` guarda la posición de cada pantalla y aplica la regla que cualquiera
+espera sin pensarla:
+
+- Si **volvés** (botón atrás del navegador o el gesto), aparecés donde estabas.
+- Si vas a una pantalla **a propósito** (tocando un enlace), empezás arriba. Nadie quiere entrar
+  al catálogo desde el menú y aparecer en la mitad.
+
+La diferencia entre las dos se sabe por `popstate`, que el navegador dispara sólo en atrás y
+adelante, nunca cuando el código cambia el hash. Esa es toda la señal; no hace falta llevar una
+pila de historial propia. Además se pone `history.scrollRestoration = "manual"`, porque si no el
+navegador también intenta restaurar por su cuenta y pelea con esto.
+
+Una posición guardada **deja de valer** si la página cambió de alto más de un 35%: se publicaron
+productos, se vació el carrito, y esa altura ya apunta a otra cosa. En ese caso, arriba.
+
+Se guarda **antes** de dibujar (ahí `scrollY` todavía es el de la pantalla que se deja) y se
+restaura **después** (hasta que la vista no existe, la página no tiene el alto necesario para
+bajar hasta donde estabas).
+
+La decisión vive separada del DOM, en `decidirDestino`, y está cubierta por `pruebas/correr.sh`.
+Su modo de falla es benigno: ante cualquier duda devuelve 0, que es exactamente lo que hacía
+antes.
+
 ## El checkout
 
 El pago no es automático: se coordina por WhatsApp. Al confirmar, la tienda:

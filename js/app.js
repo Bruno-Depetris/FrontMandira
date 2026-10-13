@@ -7,6 +7,7 @@ import { alCambiarSesion, usuarioActual } from "./sesion.js";
 import { esc } from "./ui.js";
 import { iniciarTema, conectarBotonDeTema } from "./tema.js";
 import { montarAnuncios } from "./anuncios.js";
+import { crearMemoriaDeScroll } from "./memoria-scroll.js";
 
 const contenido = document.getElementById("contenido");
 
@@ -33,8 +34,17 @@ function leerRuta() {
     return { camino, parametros };
 }
 
+const memoriaDeScroll = crearMemoriaDeScroll();
+
+/** Que pantalla se esta mostrando, para saber a nombre de quien guardar. */
+let rutaMostrada = null;
+
 async function enrutar() {
     const { camino, parametros } = leerRuta();
+
+    // Se guarda antes de dibujar: en ese momento scrollY todavia es el de la
+    // pantalla que se esta dejando.
+    memoriaDeScroll.guardar(rutaMostrada);
 
     for(const ruta of RUTAS) {
         const coincidencia = camino.match(ruta.patron);
@@ -50,7 +60,6 @@ async function enrutar() {
         }
 
         marcarNavegacionActiva(camino);
-        window.scrollTo({ top: 0, behavior: "instant" });
 
         try {
             await ruta.vista(contenido, parametros);
@@ -59,6 +68,11 @@ async function enrutar() {
             contenido.innerHTML =
                 '<div class="panel-error"><h3>Algo salió mal</h3><p>' + esc(error.message) + "</p></div>";
         }
+
+        // Despues de dibujar, no antes: hasta que la vista no existe, la pagina
+        // no tiene el alto necesario para poder bajar hasta donde estabamos.
+        rutaMostrada = camino;
+        memoriaDeScroll.restaurar(camino);
 
         return;
     }
